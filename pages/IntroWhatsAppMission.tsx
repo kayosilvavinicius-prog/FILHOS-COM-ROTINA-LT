@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Plus, Home, MessageSquare } from 'lucide-react';
+import { ChevronLeft, Plus, MessageSquare } from 'lucide-react';
 import IOSStatusBar from '../components/iOSStatusBar';
 import { Message } from '../types';
 
@@ -49,11 +49,10 @@ const IntroWhatsAppMission: React.FC = () => {
     return () => {
       isMounted.current = false;
       if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
-      // Para todos os sons do pool imediatamente
       keySoundsRef.current.forEach(a => {
         a.pause();
         a.currentTime = 0;
-        a.src = ""; // Libera recurso
+        a.src = "";
       });
       if (receivedAudioRef.current) {
         receivedAudioRef.current.pause();
@@ -143,10 +142,6 @@ const IntroWhatsAppMission: React.FC = () => {
           </div>
         </div>
       )}
-
-      <button onClick={() => navigate('/')} className="fixed top-16 right-6 z-[90] bg-black/80 p-3 rounded-full text-white shadow-xl">
-        <Home size={22} />
-      </button>
 
       <IOSStatusBar dark />
       
