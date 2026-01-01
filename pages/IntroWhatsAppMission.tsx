@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Plus, MessageSquare, Phone, Info } from 'lucide-react';
+import { ChevronLeft, Plus, MessageSquare, Phone, Info, MoreVertical } from 'lucide-react';
 import IOSStatusBar from '../components/iOSStatusBar';
 import { Message } from '../types';
 
@@ -31,11 +31,11 @@ const IntroWhatsAppMission: React.FC = () => {
 
   useEffect(() => {
     isMounted.current = true;
-    const poolSize = 8;
+    const poolSize = 6;
     const pool: HTMLAudioElement[] = [];
     for (let i = 0; i < poolSize; i++) {
       const audio = new Audio(SINGLE_KEY_SOUND_URL);
-      audio.volume = 0.3;
+      audio.volume = 0.2;
       audio.preload = "auto";
       pool.push(audio);
     }
@@ -49,28 +49,26 @@ const IntroWhatsAppMission: React.FC = () => {
     return () => {
       isMounted.current = false;
       if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
-      keySoundsRef.current.forEach(a => { a.pause(); a.src = ""; });
     };
   }, []);
 
-  let poolIndex = 0;
   const playKeySound = () => {
     if (!isMounted.current) return;
-    const audio = keySoundsRef.current[poolIndex];
+    const audio = keySoundsRef.current.find(a => a.paused || a.ended);
     if (audio) {
       audio.currentTime = 0;
       audio.play().catch(() => {});
-      poolIndex = (poolIndex + 1) % keySoundsRef.current.length;
     }
   };
 
   const typeMessage = async (text: string) => {
     if (!isMounted.current) return;
     setIsTyping(true);
-    for (let i = 0; i < text.length; i++) {
+    const chars = text.split('');
+    for (let i = 0; i < chars.length; i++) {
       if (!isMounted.current) return;
-      playKeySound();
-      await new Promise(resolve => setTimeout(resolve, 35 + Math.random() * 40));
+      if (i % 2 === 0) playKeySound();
+      await new Promise(resolve => setTimeout(resolve, 25 + Math.random() * 30));
     }
     
     if (!isMounted.current) return;
@@ -81,31 +79,32 @@ const IntroWhatsAppMission: React.FC = () => {
       receivedAudioRef.current.play().catch(() => {});
     }
 
-    const newMessage: Message = {
+    setMessages(prev => [...prev, {
       id: Date.now(),
       text: text,
       sender: "character",
       timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       status: "read"
-    };
-    setMessages(prev => [...prev, newMessage]);
+    }]);
   };
 
   const startSequence = async () => {
     if (hasStarted || !isMounted.current) return;
     setHasStarted(true);
-    await new Promise(res => setTimeout(res, 500));
+    
+    // Pequena pausa para o usuário processar a entrada no chat
+    await new Promise(res => setTimeout(res, 800));
 
     for (const text of introCopy) {
       if (!isMounted.current) return;
-      await new Promise(res => setTimeout(res, 600 + Math.random() * 800));
+      await new Promise(res => setTimeout(res, 700 + Math.random() * 1000));
       await typeMessage(text);
     }
 
     if (isMounted.current) {
       navTimeoutRef.current = setTimeout(() => {
         if (isMounted.current) navigate('/missao-1-ligacao');
-      }, 2000);
+      }, 1800);
     }
   };
 
@@ -114,41 +113,59 @@ const IntroWhatsAppMission: React.FC = () => {
   }, [messages, isTyping]);
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#F2F2F7] overflow-hidden max-w-[480px] mx-auto border-x border-gray-200 shadow-xl relative">
+    <div className="flex flex-col h-[100dvh] bg-[#F2F2F7] overflow-hidden max-w-[480px] mx-auto relative">
+      {/* iOS 17 Style Notification */}
       {!hasStarted && (
-        <div onClick={startSequence} className="absolute inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-6 cursor-pointer">
-          <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center gap-6 text-center animate-bounce">
-            <div className="w-20 h-20 bg-[#25D366] rounded-full flex items-center justify-center text-white shadow-lg shadow-[#25D366]/30">
-              <MessageSquare size={40} fill="currentColor" />
+        <div className="absolute inset-0 z-[100] bg-black/20 backdrop-blur-[2px] flex flex-col items-center pt-14 px-4">
+          <div 
+            onClick={startSequence}
+            className="w-full max-w-[400px] bg-white/80 backdrop-blur-xl rounded-[2rem] p-4 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-white/20 animate-fade-in cursor-pointer active:scale-[0.98] transition-all"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-[#25D366] rounded-xl flex items-center justify-center text-white shadow-sm">
+                <MessageSquare size={24} fill="currentColor" />
+              </div>
+              <div className="flex-1">
+                <div className="flex justify-between items-center mb-0.5">
+                  <span className="text-[13px] font-bold text-black uppercase tracking-tight">WhatsApp</span>
+                  <span className="text-[11px] text-black/50 font-medium">agora</span>
+                </div>
+                <h4 className="text-[15px] font-bold text-black">Aline Neves</h4>
+                <p className="text-[14px] text-black/80 leading-tight">Olá, mãe! Acredito que posso te ajudar a organizar essa rotina...</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-2xl font-black text-black tracking-tight mb-2">Nova Mensagem</h3>
-              <p className="text-gray-500 text-sm font-medium">Toque para ouvir o que a Aline tem para você</p>
+            <div className="mt-3 pt-3 border-t border-black/5 text-center text-[12px] font-bold text-black/40 uppercase tracking-widest">
+              Toque para abrir
             </div>
+          </div>
+          
+          <div className="mt-auto mb-16 animate-bounce flex flex-col items-center gap-2">
+            <div className="w-1 h-12 bg-white/40 rounded-full" />
+            <span className="text-white/60 text-[10px] font-bold uppercase tracking-[0.3em]">Deslize para cima</span>
           </div>
         </div>
       )}
 
       <div className="bg-[#F6F6F6] z-20">
         <IOSStatusBar dark />
-        <header className="border-b border-gray-300 px-4 py-2 flex items-center justify-between">
+        <header className="px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ChevronLeft className="text-[#007AFF]" size={28} />
+            <ChevronLeft className="text-[#007AFF]" size={30} />
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden border border-gray-200">
+              <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
                 <img src={profileImg} alt="Aline" className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col -gap-1">
-                <h2 className="text-[16px] font-bold text-black leading-tight">Aline Neves</h2>
-                <p className="text-[11px] text-gray-500 font-medium">
+                <h2 className="text-[17px] font-bold text-black leading-tight">Aline Neves</h2>
+                <p className="text-[12px] text-gray-500 font-medium">
                   {isTyping ? <span className="text-[#007AFF] animate-typing">digitando...</span> : 'online'}
                 </p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-[#007AFF]">
-             <Phone size={20} />
-             <Info size={20} />
+          <div className="flex items-center gap-5 text-[#007AFF]">
+             <Phone size={22} />
+             <MoreVertical size={22} />
           </div>
         </header>
       </div>
@@ -178,12 +195,12 @@ const IntroWhatsAppMission: React.FC = () => {
             </div>
           </div>
         )}
-        <div ref={chatEndRef} className="h-12" />
+        <div ref={chatEndRef} className="h-10" />
       </main>
 
-      <footer className="bg-[#F6F6F6] border-t border-gray-300 p-2 pb-10 flex items-center gap-3 z-20">
-        <Plus className="text-[#007AFF]" size={24} />
-        <div className="flex-1 bg-white border border-gray-300 rounded-full px-4 py-2 text-gray-300 text-[15px]">Mensagem</div>
+      <footer className="bg-[#F6F6F6] border-t border-gray-200 p-2 pb-8 flex items-center gap-3 z-20">
+        <Plus className="text-[#007AFF]" size={28} />
+        <div className="flex-1 bg-white border border-gray-300 rounded-full px-4 py-1.5 text-gray-300 text-[16px]">Mensagem</div>
         <div className="w-10 h-10 bg-[#007AFF] rounded-full flex items-center justify-center text-white">
           <MessageSquare size={20} fill="currentColor" />
         </div>

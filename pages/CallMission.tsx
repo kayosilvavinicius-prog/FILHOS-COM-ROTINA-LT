@@ -15,12 +15,11 @@ const CallMission: React.FC = () => {
   const [callDuration, setCallDuration] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
   const [isVibratingVisual, setIsVibratingVisual] = useState(false);
-  const [audioError, setAudioError] = useState<string | null>(null);
+  const [audioError, setAudioError] = useState<boolean>(false);
   const navigate = useNavigate();
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const vibrationAudioRef = useRef<HTMLAudioElement | null>(null);
-  const endCallAudioRef = useRef<HTMLAudioElement | null>(null);
   const vibrationIntervalRef = useRef<any>(null);
   const isMounted = useRef(true);
 
@@ -29,33 +28,18 @@ const CallMission: React.FC = () => {
   useEffect(() => {
     isMounted.current = true;
     
-    // Configurar áudio principal
-    const audio = new Audio(ALINE_AUDIO_URL);
-    audio.preload = "auto";
-    audio.playbackRate = 1.4; // Ligeiramente mais rápido como pedido anteriormente
-    audioRef.current = audio;
+    // Tenta pré-carregar os áudios
+    vibrationAudioRef.current = new Audio(VIBRATION_SOUND_URL);
+    vibrationAudioRef.current.loop = true;
+    vibrationAudioRef.current.volume = 0.5;
 
-    // Configurar vibração sonora
-    const vAudio = new Audio(VIBRATION_SOUND_URL);
-    vAudio.preload = "auto";
-    vAudio.loop = true;
-    vAudio.volume = 0.4;
-    vibrationAudioRef.current = vAudio;
-
-    // Configurar som de fim de chamada
-    const endAudio = new Audio(END_CALL_SOUND_URL);
-    endAudio.preload = "auto";
-    endAudio.volume = 0.5;
-    endCallAudioRef.current = endAudio;
-
-    // Iniciar vibração
+    // Inicia a vibração visual imediatamente
     startVibration();
 
     return () => {
       isMounted.current = false;
       stopVibration();
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
-      if (vibrationAudioRef.current) { vibrationAudioRef.current.pause(); vibrationAudioRef.current.src = ""; }
+      if (audioRef.current) { audioRef.current.pause(); }
     };
   }, []);
 
@@ -70,60 +54,63 @@ const CallMission: React.FC = () => {
   }, [status]);
 
   const startVibration = () => {
+    setIsVibratingVisual(true);
+    // iOS ignora navigator.vibrate, mas tentamos mesmo assim para Android
+    if (navigator.vibrate) navigator.vibrate([800, 400, 800]);
+    
+    // Tenta tocar o som de vibração (pode falhar no iOS sem clique prévio)
     if (vibrationAudioRef.current) {
       vibrationAudioRef.current.play().catch(() => {
-        // Se falhar o autoplay do som de vibração, mostramos erro visual ou ignoramos
+        console.log("Autoplay de vibração bloqueado no iOS");
       });
-    }
-    
-    setIsVibratingVisual(true);
-    
-    if (navigator.vibrate) {
-      vibrationIntervalRef.current = setInterval(() => {
-        navigator.vibrate([1000, 500, 1000]);
-      }, 2500);
-      navigator.vibrate([1000, 500, 1000]);
     }
   };
 
   const stopVibration = () => {
-    if (vibrationIntervalRef.current) {
-      clearInterval(vibrationIntervalRef.current);
-      vibrationIntervalRef.current = null;
-    }
-    if (navigator.vibrate) navigator.vibrate(0);
     setIsVibratingVisual(false);
     if (vibrationAudioRef.current) {
       vibrationAudioRef.current.pause();
-      vibrationAudioRef.current.currentTime = 0;
     }
   };
 
   const handleAnswer = () => {
     stopVibration();
     setStatus('active');
-    if (audioRef.current) {
-      // Tenta tocar imediatamente após o clique (interação humana direta)
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.error("Erro ao tocar áudio:", error);
-          setAudioError("Erro ao iniciar áudio. Toque em 'Alto-falante' para tentar novamente.");
-        });
-      }
-      audioRef.current.onended = () => { if (isMounted.current) handleHangUp(); };
+    
+    // NOVO: Criar o objeto de áudio EXATAMENTE no momento do clique (Requisito iOS)
+    const alineAudio = new Audio(ALINE_AUDIO_URL);
+    alineAudio.playbackRate = 1.3;
+    alineAudio.preload = "auto";
+    audioRef.current = alineAudio;
+
+    const playPromise = alineAudio.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        console.error("Erro ao reproduzir áudio no iOS:", error);
+        setAudioError(true);
+        // Fallback: Tentativa agressiva de tocar novamente em 100ms
+        setTimeout(() => alineAudio.play().catch(() => setAudioError(true)), 100);
+      });
     }
+
+    alineAudio.onended = () => {
+      if (isMounted.current) handleHangUp();
+    };
   };
 
   const handleHangUp = () => {
     stopVibration();
     if (audioRef.current) audioRef.current.pause();
-    if (endCallAudioRef.current) {
-      endCallAudioRef.current.play().catch(() => {});
-    }
+    
+    const endAudio = new Audio(END_CALL_SOUND_URL);
+    endAudio.play().catch(() => {});
+    
     setStatus('ended');
     setIsExiting(true);
-    setTimeout(() => { if (isMounted.current) navigate('/missao-2-whatsapp'); }, 800);
+    setTimeout(() => { 
+      if (isMounted.current) navigate('/missao-2-whatsapp'); 
+    }, 800);
   };
 
   const formatTime = (seconds: number) => {
@@ -133,38 +120,50 @@ const CallMission: React.FC = () => {
   };
 
   return (
-    <div className={`relative w-full h-[100dvh] overflow-hidden flex flex-col bg-gradient-to-b from-[#1C1C1E] to-black transition-opacity duration-500 ${isExiting ? 'opacity-0' : 'opacity-100'} ${isVibratingVisual && status === 'incoming' ? 'ios-vibrate-effect' : ''}`}>
+    <div className={`relative w-full h-[100dvh] overflow-hidden flex flex-col bg-gradient-to-b from-[#1C1C1E] to-black transition-opacity duration-500 ${isExiting ? 'opacity-0' : 'opacity-100'} ${isVibratingVisual && status === 'incoming' ? 'ios-shake-vivid' : ''}`}>
       <IOSStatusBar />
-      <style dangerouslySetInnerHTML={{ __html: `@keyframes iosHapticShake { 0% { transform: translate(0, 0); } 25% { transform: translate(-1px, -1px); } 50% { transform: translate(1px, 1px); } 75% { transform: translate(-1px, 1px); } 100% { transform: translate(0, 0); } } .ios-vibrate-effect { animation: iosHapticShake 0.1s linear infinite; }`}} />
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes iosVividShake { 
+          0% { transform: translate(0, 0); } 
+          10% { transform: translate(-3px, -3px); } 
+          20% { transform: translate(3px, 3px); } 
+          30% { transform: translate(-3px, 3px); } 
+          40% { transform: translate(3px, -3px); } 
+          50% { transform: translate(-3px, -3px); } 
+          100% { transform: translate(0, 0); } 
+        } 
+        .ios-shake-vivid { animation: iosVividShake 0.2s linear infinite; }
+      `}} />
 
       {status === 'incoming' ? (
-        <div className="flex-1 flex flex-col items-center justify-between py-12 sm:py-24 px-8 animate-fade-in">
-          <div className="flex flex-col items-center pt-10">
-            <div className="w-[120px] h-[120px] sm:w-[140px] sm:h-[140px] rounded-full overflow-hidden bg-gray-800 mb-6 border-4 border-white/5 shadow-2xl">
+        <div className="flex-1 flex flex-col items-center justify-between py-12 px-8 animate-fade-in">
+          <div className="flex flex-col items-center pt-8">
+            <div className="w-[110px] h-[110px] rounded-full overflow-hidden bg-gray-800 mb-6 border-[3px] border-white/10 shadow-2xl">
               <img src={profileImg} alt="Aline" className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-[32px] sm:text-[42px] font-bold text-white tracking-tight leading-none mb-2 sm:mb-4">Aline</h1>
-            <p className="text-[18px] sm:text-[20px] text-white/60 font-medium">Chamada de áudio do WhatsApp</p>
+            <h1 className="text-[32px] font-bold text-white tracking-tight leading-none mb-2">Aline</h1>
+            <p className="text-[17px] text-white/50 font-medium">WhatsApp Audio...</p>
           </div>
           
-          <div className="w-full flex flex-col gap-10">
-            <div className="flex justify-around items-end opacity-60">
-                <div className="flex flex-col items-center gap-2 text-white"><MessageSquare size={22} /><span className="text-[10px] uppercase font-bold tracking-widest">Mensagem</span></div>
-                <div className="flex flex-col items-center gap-2 text-white"><X size={22} /><span className="text-[10px] uppercase font-bold tracking-widest">Lembrar</span></div>
+          <div className="w-full flex flex-col gap-14">
+            <div className="flex justify-around items-end opacity-40">
+                <div className="flex flex-col items-center gap-2 text-white"><MessageSquare size={24} /><span className="text-[10px] uppercase font-bold tracking-widest">Mensagem</span></div>
+                <div className="flex flex-col items-center gap-2 text-white"><X size={24} /><span className="text-[10px] uppercase font-bold tracking-widest">Lembrar</span></div>
             </div>
             
-            <div className="flex justify-between items-center px-4 pb-8 sm:pb-12">
+            <div className="flex justify-between items-center px-4 pb-12">
               <div className="flex flex-col items-center gap-3">
-                <button onClick={handleHangUp} className="w-[72px] h-[72px] sm:w-[78px] sm:h-[78px] bg-[#FF3B30] rounded-full flex items-center justify-center text-white active:scale-90 transition-all">
-                  <Phone size={30} className="rotate-[135deg]" fill="currentColor" />
+                <button onClick={handleHangUp} className="w-[75px] h-[75px] bg-[#FF3B30] rounded-full flex items-center justify-center text-white active:scale-90 transition-all shadow-xl">
+                  <Phone size={32} className="rotate-[135deg]" fill="currentColor" />
                 </button>
-                <span className="text-xs font-semibold text-white/80">Recusar</span>
+                <span className="text-[12px] font-bold text-white/70">Recusar</span>
               </div>
               <div className="flex flex-col items-center gap-3">
-                <button onClick={handleAnswer} className="w-[72px] h-[72px] sm:w-[78px] sm:h-[78px] bg-[#34C759] rounded-full flex items-center justify-center text-white active:scale-95 shadow-[0_0_30px_rgba(52,199,89,0.3)] animate-pulse">
-                  <Phone size={30} fill="currentColor" />
+                <button onClick={handleAnswer} className="w-[75px] h-[75px] bg-[#34C759] rounded-full flex items-center justify-center text-white active:scale-[0.85] shadow-[0_0_40px_rgba(52,199,89,0.3)] animate-pulse">
+                  <Phone size={32} fill="currentColor" />
                 </button>
-                <span className="text-xs font-semibold text-white/80">Aceitar</span>
+                <span className="text-[12px] font-bold text-white/70">Aceitar</span>
               </div>
             </div>
           </div>
@@ -172,50 +171,57 @@ const CallMission: React.FC = () => {
       ) : (
         <div className="flex-1 flex flex-col animate-fade-in justify-between">
           <div className="flex flex-col items-center pt-16">
-            <div className="w-[100px] h-[100px] rounded-full overflow-hidden bg-gray-800 mb-4 border-2 border-white/10">
+            <div className="w-[90px] h-[90px] rounded-full overflow-hidden bg-gray-800 mb-5 border-2 border-white/10">
               <img src={profileImg} alt="Aline" className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-[28px] font-semibold text-white tracking-tight">Aline</h1>
-            <p className="text-[14px] text-[#A0A0A0] font-normal mb-1">WhatsApp Audio</p>
-            <p className="text-[20px] font-light text-white tabular-nums tracking-wider">{formatTime(callDuration)}</p>
+            <h1 className="text-[26px] font-bold text-white tracking-tight">Aline</h1>
+            <p className="text-[14px] text-white/40 font-medium mb-2 uppercase tracking-widest">
+               {callDuration === 0 ? 'Conectando...' : 'Em chamada'}
+            </p>
+            <p className="text-[22px] font-light text-white tabular-nums tracking-widest">{formatTime(callDuration)}</p>
             
             {audioError && (
-              <div className="mt-4 mx-8 flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10 text-white/60 text-center animate-pulse">
-                <AlertCircle size={16} />
-                <p className="text-[11px]">{audioError}</p>
+              <div className="mt-8 mx-10 bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col items-center gap-2 animate-bounce">
+                <AlertCircle size={20} className="text-[#FFCC00]" />
+                <p className="text-[12px] text-white/80 font-bold text-center">Som bloqueado pelo iPhone. Toque no botão de alto-falante abaixo.</p>
               </div>
             )}
           </div>
 
-          <div className="px-8 sm:px-10 pb-12">
-            <div className="grid grid-cols-3 gap-y-8 sm:gap-y-12 mb-10 sm:mb-16">
+          <div className="px-10 pb-16">
+            <div className="grid grid-cols-3 gap-y-10 mb-12">
               {[
                 { icon: <MicOff size={24} />, label: "mudo" },
                 { icon: <Grid3x3 size={24} />, label: "teclado" },
-                { icon: <Volume2 size={24} />, label: "alto-falante" },
+                { icon: <Volume2 size={24} />, label: "viva-voz", active: audioError },
                 { icon: <Plus size={24} />, label: "adicionar" },
                 { icon: <Video size={24} />, label: "FaceTime", disabled: true },
                 { icon: <Users size={24} />, label: "contatos" },
               ].map((item, idx) => (
-                <div key={idx} className={`flex flex-col items-center gap-2 ${item.disabled ? 'opacity-30' : 'opacity-100'}`}>
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/10 flex items-center justify-center text-white">
+                <button key={idx} 
+                  onClick={() => { if(item.label === 'viva-voz') audioRef.current?.play(); }}
+                  className={`flex flex-col items-center gap-2 transition-all ${item.disabled ? 'opacity-20' : 'active:scale-90'}`}
+                >
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white ${item.active ? 'bg-white text-black' : 'bg-white/10'}`}>
                     {item.icon}
                   </div>
-                  <span className="text-[11px] font-medium text-white/70">{item.label}</span>
-                </div>
+                  <span className="text-[11px] font-bold text-white/60 uppercase tracking-tighter">{item.label}</span>
+                </button>
               ))}
             </div>
             
             <div className="flex justify-center">
-              <button onClick={handleHangUp} className="w-[68px] h-[68px] sm:w-[72px] sm:h-[72px] bg-[#FF3B30] rounded-full flex items-center justify-center text-white active:scale-90 transition-all shadow-2xl">
-                <Phone size={30} className="rotate-[135deg]" fill="currentColor" />
+              <button onClick={handleHangUp} className="w-[72px] h-[72px] bg-[#FF3B30] rounded-full flex items-center justify-center text-white active:scale-90 transition-all shadow-2xl">
+                <Phone size={32} className="rotate-[135deg]" fill="currentColor" />
               </button>
             </div>
           </div>
         </div>
       )}
-      <div className="flex justify-center pb-2 pointer-events-none">
-        <div className="w-32 h-1 bg-white/20 rounded-full" />
+      
+      {/* Home Indicator */}
+      <div className="flex justify-center pb-3 pt-2">
+        <div className="w-32 h-1.5 bg-white/20 rounded-full" />
       </div>
     </div>
   );
