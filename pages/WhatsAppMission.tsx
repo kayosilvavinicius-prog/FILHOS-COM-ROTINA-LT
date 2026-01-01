@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Plus, MessageSquare } from 'lucide-react';
+import { ChevronLeft, Plus, MessageSquare, Phone, Info } from 'lucide-react';
 import IOSStatusBar from '../components/iOSStatusBar';
 import { Message } from '../types';
 
@@ -38,32 +38,24 @@ const WhatsAppMission: React.FC = () => {
 
   useEffect(() => {
     isMounted.current = true;
-    const poolSize = 12;
+    const poolSize = 8;
     const pool: HTMLAudioElement[] = [];
     for (let i = 0; i < poolSize; i++) {
       const audio = new Audio(SINGLE_KEY_SOUND_URL);
-      audio.volume = 0.4;
+      audio.volume = 0.3;
       audio.preload = "auto";
       pool.push(audio);
     }
     keySoundsRef.current = pool;
 
     const rAudio = new Audio(RECEIVED_SOUND_URL);
-    rAudio.volume = 0.5;
+    rAudio.volume = 0.4;
     rAudio.preload = "auto";
     receivedAudioRef.current = rAudio;
 
     return () => {
       isMounted.current = false;
-      keySoundsRef.current.forEach(a => {
-        a.pause();
-        a.currentTime = 0;
-        a.src = "";
-      });
-      if (receivedAudioRef.current) {
-        receivedAudioRef.current.pause();
-        receivedAudioRef.current.src = "";
-      }
+      keySoundsRef.current.forEach(a => { a.pause(); a.src = ""; });
     };
   }, []);
 
@@ -84,8 +76,7 @@ const WhatsAppMission: React.FC = () => {
     for (let i = 0; i < text.length; i++) {
       if (!isMounted.current) return;
       playKeySound();
-      const delay = 45 + Math.random() * 60;
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise(resolve => setTimeout(resolve, 30 + Math.random() * 40));
     }
     if (!isMounted.current) return;
     setIsTyping(false);
@@ -109,8 +100,7 @@ const WhatsAppMission: React.FC = () => {
     await new Promise(res => setTimeout(res, 500));
     for (const text of copy) {
       if (!isMounted.current) return;
-      const thinkTime = 1000 + Math.random() * 1200;
-      await new Promise(res => setTimeout(res, thinkTime));
+      await new Promise(res => setTimeout(res, 800 + Math.random() * 1000));
       await typeMessage(text);
     }
     if (isMounted.current) setShowCTA(true);
@@ -121,54 +111,60 @@ const WhatsAppMission: React.FC = () => {
   }, [messages, isTyping]);
 
   return (
-    <div className="flex flex-col h-screen bg-[#F2F2F7] overflow-hidden max-w-[480px] mx-auto border-x border-gray-200 shadow-xl relative">
+    <div className="flex flex-col h-[100dvh] bg-[#F2F2F7] overflow-hidden max-w-[480px] mx-auto border-x border-gray-200 shadow-xl relative">
       {!hasStarted && (
-        <div onClick={startSequence} className="absolute inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-6 cursor-pointer group">
-          <div className="bg-white rounded-3xl p-8 shadow-2xl flex flex-col items-center gap-4 text-center animate-bounce">
-            <div className="w-16 h-16 bg-[#25D366] rounded-full flex items-center justify-center text-white">
-              <MessageSquare size={32} fill="currentColor" />
+        <div onClick={startSequence} className="absolute inset-0 z-[100] bg-black/50 backdrop-blur-md flex items-center justify-center p-6 cursor-pointer">
+          <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center gap-5 text-center animate-bounce">
+            <div className="w-20 h-20 bg-[#25D366] rounded-full flex items-center justify-center text-white shadow-xl shadow-[#25D366]/20">
+              <MessageSquare size={36} fill="currentColor" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-black">Aline está online</h3>
-              <p className="text-gray-500 text-sm">Toque para ver as mensagens</p>
+              <h3 className="text-2xl font-black text-black tracking-tight mb-2">Aline Neves</h3>
+              <p className="text-gray-500 text-sm font-medium">Toque para ver o segredo da rotina</p>
             </div>
           </div>
         </div>
       )}
 
-      <IOSStatusBar dark />
-      <header className="bg-[#F6F6F6] border-b border-gray-300 px-4 py-2 flex items-center justify-between z-10">
-        <div className="flex items-center gap-1">
-          <ChevronLeft className="text-[#007AFF]" size={28} />
+      <div className="bg-[#F6F6F6] z-20">
+        <IOSStatusBar dark />
+        <header className="border-b border-gray-300 px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
-              <img src={profileImg} alt="Aline" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <h2 className="text-[17px] font-semibold text-black">Aline Neves</h2>
-              <p className="text-[12px] text-gray-500 font-normal h-4">
-                {isTyping ? <span className="text-[#007AFF] animate-typing">digitando...</span> : 'online'}
-              </p>
+            <ChevronLeft className="text-[#007AFF]" size={28} />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden border border-gray-200">
+                <img src={profileImg} alt="Aline" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex flex-col -gap-1">
+                <h2 className="text-[16px] font-bold text-black leading-tight">Aline Neves</h2>
+                <p className="text-[11px] text-gray-500 font-medium">
+                  {isTyping ? <span className="text-[#007AFF] animate-typing">digitando...</span> : 'online'}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+          <div className="flex items-center gap-4 text-[#007AFF]">
+             <Phone size={20} />
+             <Info size={20} />
+          </div>
+        </header>
+      </div>
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#E5DDD5] relative" 
+      <main className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#E5DDD5] relative" 
             style={{ backgroundImage: "url('https://w0.peakpx.com/wallpaper/580/624/HD-wallpaper-whatsapp-background-dark-pattern-whatsapp-doodle-doodle-art.jpg')", backgroundSize: '400px', backgroundBlendMode: 'overlay' }}>
         {messages.map((msg) => (
           <div key={msg.id} className="flex flex-col animate-fade-in">
-            <div className={`max-w-[85%] px-3 py-2 rounded-lg relative text-[16px] shadow-sm ${msg.sender === 'character' ? 'bg-white self-start text-black rounded-tl-none' : 'bg-[#DCF8C6] self-end text-black rounded-tr-none'}`}>
+            <div className={`max-w-[85%] px-3 py-1.5 rounded-lg relative text-[15px] shadow-sm border border-gray-200/50 ${msg.sender === 'character' ? 'bg-white self-start text-black rounded-tl-none' : 'bg-[#DCF8C6] self-end text-black rounded-tr-none'}`}>
               {msg.text}
-              <div className="flex items-center justify-end gap-1 mt-1 text-[10px] text-gray-400">
+              <div className="flex items-center justify-end gap-1 mt-0.5 text-[9px] text-gray-400 font-medium">
                 {msg.timestamp}
-                {msg.sender === 'character' && <div className="flex ml-0.5"><span className="text-[#34B7F1]">✓✓</span></div>}
+                {msg.sender === 'character' && <span className="text-[#34B7F1] text-[12px]">✓✓</span>}
               </div>
             </div>
           </div>
         ))}
         {isTyping && (
-          <div className="flex self-start bg-white px-4 py-2 rounded-lg rounded-tl-none shadow-sm animate-fade-in">
+          <div className="flex self-start bg-white px-3 py-2 rounded-lg rounded-tl-none shadow-sm animate-fade-in border border-gray-200/50">
             <div className="flex gap-1 py-1">
               <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
               <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
@@ -180,16 +176,19 @@ const WhatsAppMission: React.FC = () => {
       </main>
 
       {showCTA && (
-        <div className="absolute bottom-[100px] left-0 right-0 px-6 flex justify-center z-20 animate-fade-in">
-          <button onClick={() => navigate('/missao-3-video')} className="w-full bg-[#25D366] text-white font-bold py-4 rounded-2xl shadow-[0_10px_30px_rgba(37,211,102,0.4)] flex items-center justify-center gap-3 active:scale-95 transition-all animate-pulse">
-            <span>VER COMO ISSO MUDA TUDO ▶️</span>
+        <div className="absolute bottom-[110px] left-0 right-0 px-6 flex justify-center z-30 animate-fade-in">
+          <button onClick={() => navigate('/missao-3-video')} className="w-full bg-[#25D366] text-white font-black py-4.5 rounded-2xl shadow-[0_15px_40px_rgba(37,211,102,0.4)] flex items-center justify-center gap-3 active:scale-95 transition-all animate-pulse border-2 border-white/20">
+            <span className="text-[15px]">VER COMO ISSO MUDA TUDO ▶️</span>
           </button>
         </div>
       )}
 
-      <footer className="bg-[#F6F6F6] border-t border-gray-300 p-2 pb-8 flex items-center gap-3">
+      <footer className="bg-[#F6F6F6] border-t border-gray-300 p-2 pb-10 flex items-center gap-3 z-20">
         <Plus className="text-[#007AFF]" size={24} />
-        <div className="flex-1 bg-white border border-gray-300 rounded-full px-4 py-1.5 flex items-center text-gray-300 text-sm">Mensagem</div>
+        <div className="flex-1 bg-white border border-gray-300 rounded-full px-4 py-2 text-gray-300 text-[15px]">Mensagem</div>
+        <div className="w-10 h-10 bg-[#007AFF] rounded-full flex items-center justify-center text-white">
+          <MessageSquare size={20} fill="currentColor" />
+        </div>
       </footer>
     </div>
   );
