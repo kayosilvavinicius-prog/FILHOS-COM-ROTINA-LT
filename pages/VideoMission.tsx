@@ -62,6 +62,7 @@ const VideoMission: React.FC = () => {
 
   useEffect(() => {
     if (videoRef.current) {
+      videoRef.current.playbackRate = 1.4; // Velocidade 1.4x como solicitado
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {

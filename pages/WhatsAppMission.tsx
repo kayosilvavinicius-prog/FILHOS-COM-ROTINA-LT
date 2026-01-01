@@ -13,7 +13,6 @@ const WhatsAppMission: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showCTA, setShowCTA] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const isMounted = useRef(true);
   
@@ -52,6 +51,9 @@ const WhatsAppMission: React.FC = () => {
     rAudio.volume = 0.4;
     rAudio.preload = "auto";
     receivedAudioRef.current = rAudio;
+
+    // Iniciar sequência automaticamente
+    startSequence();
 
     return () => {
       isMounted.current = false;
@@ -95,9 +97,7 @@ const WhatsAppMission: React.FC = () => {
   };
 
   const startSequence = async () => {
-    if (hasStarted || !isMounted.current) return;
-    setHasStarted(true);
-    await new Promise(res => setTimeout(res, 500));
+    await new Promise(res => setTimeout(res, 1200)); // Pequeno delay ao entrar
     for (const text of copy) {
       if (!isMounted.current) return;
       await new Promise(res => setTimeout(res, 800 + Math.random() * 1000));
@@ -111,21 +111,7 @@ const WhatsAppMission: React.FC = () => {
   }, [messages, isTyping]);
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#F2F2F7] overflow-hidden max-w-[480px] mx-auto border-x border-gray-200 shadow-xl relative">
-      {!hasStarted && (
-        <div onClick={startSequence} className="absolute inset-0 z-[100] bg-black/50 backdrop-blur-md flex items-center justify-center p-6 cursor-pointer">
-          <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center gap-5 text-center animate-bounce">
-            <div className="w-20 h-20 bg-[#25D366] rounded-full flex items-center justify-center text-white shadow-xl shadow-[#25D366]/20">
-              <MessageSquare size={36} fill="currentColor" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-black text-black tracking-tight mb-2">Aline Neves</h3>
-              <p className="text-gray-500 text-sm font-medium">Toque para ver o segredo da rotina</p>
-            </div>
-          </div>
-        </div>
-      )}
-
+    <div className="flex flex-col h-[100dvh] bg-[#F2F2F7] overflow-hidden max-w-[480px] mx-auto relative shadow-2xl">
       <div className="bg-[#F6F6F6] z-20">
         <IOSStatusBar dark />
         <header className="border-b border-gray-300 px-4 py-2 flex items-center justify-between">

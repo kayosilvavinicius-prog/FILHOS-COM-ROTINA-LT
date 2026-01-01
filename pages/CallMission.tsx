@@ -20,7 +20,6 @@ const CallMission: React.FC = () => {
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const vibrationAudioRef = useRef<HTMLAudioElement | null>(null);
-  const vibrationIntervalRef = useRef<any>(null);
   const isMounted = useRef(true);
 
   const profileImg = "https://raw.githubusercontent.com/kayosilvavinicius-prog/FILHOS-COM-ROTINA/33b5814f67fd820ca815cac9094f790e29102d28/ALINE%20WHATSAPP.jpg";
@@ -28,18 +27,29 @@ const CallMission: React.FC = () => {
   useEffect(() => {
     isMounted.current = true;
     
-    // Tenta pré-carregar os áudios
-    vibrationAudioRef.current = new Audio(VIBRATION_SOUND_URL);
-    vibrationAudioRef.current.loop = true;
-    vibrationAudioRef.current.volume = 0.5;
+    // Tenta carregar o som de vibração
+    const vAudio = new Audio(VIBRATION_SOUND_URL);
+    vAudio.loop = true;
+    vAudio.volume = 0.4;
+    vibrationAudioRef.current = vAudio;
 
-    // Inicia a vibração visual imediatamente
-    startVibration();
+    // Inicia a vibração visual
+    setIsVibratingVisual(true);
+    if (navigator.vibrate) navigator.vibrate([800, 400, 800]);
+    
+    // Tenta tocar vibração (pode ser bloqueado no iOS até o primeiro clique)
+    vAudio.play().catch(() => console.log("Autoplay vibração bloqueado"));
 
     return () => {
       isMounted.current = false;
-      stopVibration();
-      if (audioRef.current) { audioRef.current.pause(); }
+      if (vibrationAudioRef.current) {
+        vibrationAudioRef.current.pause();
+        vibrationAudioRef.current.src = "";
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
     };
   }, []);
 
@@ -53,55 +63,42 @@ const CallMission: React.FC = () => {
     return () => clearInterval(timer);
   }, [status]);
 
-  const startVibration = () => {
-    setIsVibratingVisual(true);
-    // iOS ignora navigator.vibrate, mas tentamos mesmo assim para Android
-    if (navigator.vibrate) navigator.vibrate([800, 400, 800]);
-    
-    // Tenta tocar o som de vibração (pode falhar no iOS sem clique prévio)
-    if (vibrationAudioRef.current) {
-      vibrationAudioRef.current.play().catch(() => {
-        console.log("Autoplay de vibração bloqueado no iOS");
-      });
-    }
-  };
-
-  const stopVibration = () => {
+  const handleAnswer = () => {
     setIsVibratingVisual(false);
     if (vibrationAudioRef.current) {
       vibrationAudioRef.current.pause();
     }
-  };
-
-  const handleAnswer = () => {
-    stopVibration();
     setStatus('active');
     
-    // NOVO: Criar o objeto de áudio EXATAMENTE no momento do clique (Requisito iOS)
+    // Criação do áudio DENTRO do evento de clique para desbloquear no iOS
     const alineAudio = new Audio(ALINE_AUDIO_URL);
-    alineAudio.playbackRate = 1.3;
+    alineAudio.playbackRate = 1.35;
     alineAudio.preload = "auto";
     audioRef.current = alineAudio;
 
-    const playPromise = alineAudio.play();
-    
-    if (playPromise !== undefined) {
-      playPromise.catch(error => {
-        console.error("Erro ao reproduzir áudio no iOS:", error);
-        setAudioError(true);
-        // Fallback: Tentativa agressiva de tocar novamente em 100ms
-        setTimeout(() => alineAudio.play().catch(() => setAudioError(true)), 100);
-      });
-    }
+    alineAudio.play().then(() => {
+      setAudioError(false);
+    }).catch(error => {
+      console.error("Erro ao reproduzir áudio no iOS:", error);
+      setAudioError(true);
+    });
 
     alineAudio.onended = () => {
       if (isMounted.current) handleHangUp();
     };
   };
 
+  const tryForcePlay = () => {
+    if (audioRef.current) {
+      audioRef.current.play()
+        .then(() => setAudioError(false))
+        .catch(() => setAudioError(true));
+    }
+  };
+
   const handleHangUp = () => {
-    stopVibration();
     if (audioRef.current) audioRef.current.pause();
+    if (vibrationAudioRef.current) vibrationAudioRef.current.pause();
     
     const endAudio = new Audio(END_CALL_SOUND_URL);
     endAudio.play().catch(() => {});
@@ -133,13 +130,13 @@ const CallMission: React.FC = () => {
           50% { transform: translate(-3px, -3px); } 
           100% { transform: translate(0, 0); } 
         } 
-        .ios-shake-vivid { animation: iosVividShake 0.2s linear infinite; }
+        .ios-shake-vivid { animation: iosVividShake 0.15s linear infinite; }
       `}} />
 
       {status === 'incoming' ? (
         <div className="flex-1 flex flex-col items-center justify-between py-12 px-8 animate-fade-in">
-          <div className="flex flex-col items-center pt-8">
-            <div className="w-[110px] h-[110px] rounded-full overflow-hidden bg-gray-800 mb-6 border-[3px] border-white/10 shadow-2xl">
+          <div className="flex flex-col items-center pt-8 text-center">
+            <div className="w-[110px] h-[110px] rounded-full overflow-hidden bg-gray-800 mb-6 border-[3px] border-white/10 shadow-2xl mx-auto">
               <img src={profileImg} alt="Aline" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-[32px] font-bold text-white tracking-tight leading-none mb-2">Aline</h1>
@@ -170,48 +167,49 @@ const CallMission: React.FC = () => {
         </div>
       ) : (
         <div className="flex-1 flex flex-col animate-fade-in justify-between">
-          <div className="flex flex-col items-center pt-16">
+          <div className="flex flex-col items-center pt-12">
             <div className="w-[90px] h-[90px] rounded-full overflow-hidden bg-gray-800 mb-5 border-2 border-white/10">
               <img src={profileImg} alt="Aline" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-[26px] font-bold text-white tracking-tight">Aline</h1>
-            <p className="text-[14px] text-white/40 font-medium mb-2 uppercase tracking-widest">
-               {callDuration === 0 ? 'Conectando...' : 'Em chamada'}
+            <p className="text-[14px] text-white/40 font-medium mb-1 uppercase tracking-widest">
+               {callDuration === 0 ? 'Conectando...' : 'WhatsApp Audio'}
             </p>
             <p className="text-[22px] font-light text-white tabular-nums tracking-widest">{formatTime(callDuration)}</p>
             
             {audioError && (
-              <div className="mt-8 mx-10 bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col items-center gap-2 animate-bounce">
+              <div className="mt-6 mx-8 bg-[#FFCC00]/10 border border-[#FFCC00]/30 p-4 rounded-2xl flex flex-col items-center gap-2 animate-pulse">
                 <AlertCircle size={20} className="text-[#FFCC00]" />
-                <p className="text-[12px] text-white/80 font-bold text-center">Som bloqueado pelo iPhone. Toque no botão de alto-falante abaixo.</p>
+                <p className="text-[12px] text-[#FFCC00] font-bold text-center">Toque no botão 'viva-voz' abaixo para ouvir a Aline.</p>
               </div>
             )}
           </div>
 
-          <div className="px-10 pb-16">
-            <div className="grid grid-cols-3 gap-y-10 mb-12">
+          <div className="px-10 pb-12">
+            <div className="grid grid-cols-3 gap-y-8 mb-8">
               {[
                 { icon: <MicOff size={24} />, label: "mudo" },
                 { icon: <Grid3x3 size={24} />, label: "teclado" },
-                { icon: <Volume2 size={24} />, label: "viva-voz", active: audioError },
+                { icon: <Volume2 size={24} />, label: "viva-voz", active: audioError, action: tryForcePlay },
                 { icon: <Plus size={24} />, label: "adicionar" },
                 { icon: <Video size={24} />, label: "FaceTime", disabled: true },
                 { icon: <Users size={24} />, label: "contatos" },
               ].map((item, idx) => (
                 <button key={idx} 
-                  onClick={() => { if(item.label === 'viva-voz') audioRef.current?.play(); }}
+                  onClick={item.action}
+                  disabled={item.disabled}
                   className={`flex flex-col items-center gap-2 transition-all ${item.disabled ? 'opacity-20' : 'active:scale-90'}`}
                 >
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white ${item.active ? 'bg-white text-black' : 'bg-white/10'}`}>
+                  <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white ${item.active ? 'bg-white text-black animate-bounce' : 'bg-white/10'}`}>
                     {item.icon}
                   </div>
-                  <span className="text-[11px] font-bold text-white/60 uppercase tracking-tighter">{item.label}</span>
+                  <span className="text-[10px] font-bold text-white/60 uppercase tracking-tighter">{item.label}</span>
                 </button>
               ))}
             </div>
             
             <div className="flex justify-center">
-              <button onClick={handleHangUp} className="w-[72px] h-[72px] bg-[#FF3B30] rounded-full flex items-center justify-center text-white active:scale-90 transition-all shadow-2xl">
+              <button onClick={handleHangUp} className="w-[68px] h-[68px] sm:w-[72px] sm:h-[72px] bg-[#FF3B30] rounded-full flex items-center justify-center text-white active:scale-90 transition-all shadow-2xl">
                 <Phone size={32} className="rotate-[135deg]" fill="currentColor" />
               </button>
             </div>
@@ -220,7 +218,7 @@ const CallMission: React.FC = () => {
       )}
       
       {/* Home Indicator */}
-      <div className="flex justify-center pb-3 pt-2">
+      <div className="flex justify-center pb-4 pt-2">
         <div className="w-32 h-1.5 bg-white/20 rounded-full" />
       </div>
     </div>
