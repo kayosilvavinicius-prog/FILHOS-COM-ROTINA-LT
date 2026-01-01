@@ -12,7 +12,6 @@ const App: React.FC = () => {
     <HashRouter>
       <div className="min-h-screen bg-black text-white selection:bg-blue-500/30">
         <Routes>
-          {/* A jornada começa aqui */}
           <Route path="/" element={<IntroWhatsAppMission />} />
           <Route path="/missao-1-ligacao" element={<CallMission />} />
           <Route path="/missao-2-whatsapp" element={<WhatsAppMission />} />
