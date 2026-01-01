@@ -109,7 +109,13 @@ const SalesPage: React.FC = () => {
         </div>
       </section>
 
-      <footer className="py-24 px-6 border-t border-gray-100 text-center bg-white"><div className="text-[#FE2C55] font-black text-3xl tracking-tighter mb-6">d4k maternidade.</div><p className="text-gray-900 text-[11px] font-black uppercase tracking-[0.1em] mb-2 leading-tight">D N F SANTOS MARKETING DIGITAL - ME (DIGITAL KINGDOM)</p><p className="text-gray-400 text-[10px] font-bold max-w-[500px] mx-auto leading-relaxed uppercase tracking-[0.2em] mb-10">CNPJ: 54.706.912/0001-02 • Todos os direitos reservados.</p></footer>
+      <footer className="py-24 px-6 border-t border-gray-100 text-center bg-white">
+        <div className="text-[#FE2C55] font-black text-3xl tracking-tighter mb-6">d4k maternidade.</div>
+        <p className="text-gray-900 text-[11px] font-black uppercase tracking-[0.1em] mb-2 leading-tight">D N F SANTOS MARKETING DIGITAL - ME (DIGITAL KINGDOM)</p>
+        <p className="text-gray-400 text-[10px] font-bold max-w-[600px] mx-auto leading-relaxed uppercase tracking-[0.2em] mb-10">
+          CNPJ: 54.706.912/0001-02 • Campinas - SP • Todos os direitos reservados.
+        </p>
+      </footer>
 
       <div className={`fixed bottom-0 left-0 right-0 p-4 z-[200] transition-all duration-700 transform ${scrolled ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}><div className="max-w-[480px] mx-auto"><button onClick={() => setShowLeadForm(true)} className="w-full bg-[#FE2C55] text-white font-black py-5 rounded-[2rem] shadow-[0_15px_45px_rgba(254,44,85,0.6)] flex items-center justify-center gap-3 active:scale-95 border-2 border-white/20"><span className="text-base uppercase tracking-tight">Garantir Promoção • R$ 19,90</span><ArrowRight size={20} /></button></div></div>
 
