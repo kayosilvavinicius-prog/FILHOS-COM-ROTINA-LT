@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import IntroWhatsAppMission from './pages/IntroWhatsAppMission';
 import CallMission from './pages/CallMission';
 import WhatsAppMission from './pages/WhatsAppMission';
@@ -20,6 +21,7 @@ const App: React.FC = () => {
           <Route path="/sales" element={<SalesPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <SpeedInsights />
       </div>
     </HashRouter>
   );
