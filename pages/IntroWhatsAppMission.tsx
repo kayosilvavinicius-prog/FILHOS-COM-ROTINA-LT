@@ -61,6 +61,13 @@ const IntroWhatsAppMission: React.FC = () => {
     }
   };
 
+  const unlockAudio = () => {
+    // Tática iOS: tocar som curto e silencioso no primeiro toque para liberar o hardware
+    const silent = new Audio(SINGLE_KEY_SOUND_URL);
+    silent.volume = 0.01;
+    silent.play().catch(() => {});
+  };
+
   const typeMessage = async (text: string) => {
     if (!isMounted.current) return;
     setIsTyping(true);
@@ -90,9 +97,9 @@ const IntroWhatsAppMission: React.FC = () => {
 
   const startSequence = async () => {
     if (hasStarted || !isMounted.current) return;
+    unlockAudio();
     setHasStarted(true);
     
-    // Pequena pausa para o usuário processar a entrada no chat
     await new Promise(res => setTimeout(res, 800));
 
     for (const text of introCopy) {
@@ -114,7 +121,6 @@ const IntroWhatsAppMission: React.FC = () => {
 
   return (
     <div className="flex flex-col h-[100dvh] bg-[#F2F2F7] overflow-hidden max-w-[480px] mx-auto relative">
-      {/* iOS 17 Style Notification */}
       {!hasStarted && (
         <div className="absolute inset-0 z-[100] bg-black/20 backdrop-blur-[2px] flex flex-col items-center pt-14 px-4">
           <div 
@@ -137,11 +143,6 @@ const IntroWhatsAppMission: React.FC = () => {
             <div className="mt-3 pt-3 border-t border-black/5 text-center text-[12px] font-bold text-black/40 uppercase tracking-widest">
               Toque para abrir
             </div>
-          </div>
-          
-          <div className="mt-auto mb-16 animate-bounce flex flex-col items-center gap-2">
-            <div className="w-1 h-12 bg-white/40 rounded-full" />
-            <span className="text-white/60 text-[10px] font-bold uppercase tracking-[0.3em]">Deslize para cima</span>
           </div>
         </div>
       )}

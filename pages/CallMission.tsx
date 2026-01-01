@@ -27,18 +27,15 @@ const CallMission: React.FC = () => {
   useEffect(() => {
     isMounted.current = true;
     
-    // Tenta carregar o som de vibração
     const vAudio = new Audio(VIBRATION_SOUND_URL);
     vAudio.loop = true;
     vAudio.volume = 0.4;
     vibrationAudioRef.current = vAudio;
 
-    // Inicia a vibração visual
     setIsVibratingVisual(true);
     if (navigator.vibrate) navigator.vibrate([800, 400, 800]);
     
-    // Tenta tocar vibração (pode ser bloqueado no iOS até o primeiro clique)
-    vAudio.play().catch(() => console.log("Autoplay vibração bloqueado"));
+    vAudio.play().catch(() => console.log("Vibração silenciosa no início"));
 
     return () => {
       isMounted.current = false;
@@ -63,37 +60,46 @@ const CallMission: React.FC = () => {
     return () => clearInterval(timer);
   }, [status]);
 
-  const handleAnswer = () => {
-    setIsVibratingVisual(false);
-    if (vibrationAudioRef.current) {
-      vibrationAudioRef.current.pause();
-    }
-    setStatus('active');
+  const initAlineAudio = () => {
+    const audio = new Audio(ALINE_AUDIO_URL);
+    audio.playbackRate = 1.35;
+    audio.preload = "auto";
+    audio.muted = false;
+    audio.volume = 1.0;
     
-    // Criação do áudio DENTRO do evento de clique para desbloquear no iOS
-    const alineAudio = new Audio(ALINE_AUDIO_URL);
-    alineAudio.playbackRate = 1.35;
-    alineAudio.preload = "auto";
-    audioRef.current = alineAudio;
-
-    alineAudio.play().then(() => {
-      setAudioError(false);
-    }).catch(error => {
-      console.error("Erro ao reproduzir áudio no iOS:", error);
-      setAudioError(true);
-    });
-
-    alineAudio.onended = () => {
+    audio.onended = () => {
       if (isMounted.current) handleHangUp();
     };
+
+    audioRef.current = audio;
+    return audio;
+  };
+
+  const handleAnswer = () => {
+    setIsVibratingVisual(false);
+    if (vibrationAudioRef.current) vibrationAudioRef.current.pause();
+    setStatus('active');
+    
+    const alineAudio = initAlineAudio();
+    alineAudio.play()
+      .then(() => setAudioError(false))
+      .catch(error => {
+        console.error("Autoplay falhou no iOS:", error);
+        setAudioError(true);
+      });
   };
 
   const tryForcePlay = () => {
+    // Se deu erro, matamos o objeto anterior e criamos um novo para garantir que o Safari aceite o novo evento de clique
     if (audioRef.current) {
-      audioRef.current.play()
-        .then(() => setAudioError(false))
-        .catch(() => setAudioError(true));
+      audioRef.current.pause();
+      audioRef.current.src = "";
     }
+    
+    const newAudio = initAlineAudio();
+    newAudio.play()
+      .then(() => setAudioError(false))
+      .catch(() => setAudioError(true));
   };
 
   const handleHangUp = () => {
@@ -131,6 +137,8 @@ const CallMission: React.FC = () => {
           100% { transform: translate(0, 0); } 
         } 
         .ios-shake-vivid { animation: iosVividShake 0.15s linear infinite; }
+        @keyframes pulseAlert { 0% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 204, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0); } }
+        .viva-voz-alert { animation: pulseAlert 1.5s infinite; }
       `}} />
 
       {status === 'incoming' ? (
@@ -178,9 +186,9 @@ const CallMission: React.FC = () => {
             <p className="text-[22px] font-light text-white tabular-nums tracking-widest">{formatTime(callDuration)}</p>
             
             {audioError && (
-              <div className="mt-6 mx-8 bg-[#FFCC00]/10 border border-[#FFCC00]/30 p-4 rounded-2xl flex flex-col items-center gap-2 animate-pulse">
+              <div className="mt-6 mx-8 bg-[#FFCC00]/10 border border-[#FFCC00]/30 p-4 rounded-2xl flex flex-col items-center gap-2 animate-bounce">
                 <AlertCircle size={20} className="text-[#FFCC00]" />
-                <p className="text-[12px] text-[#FFCC00] font-bold text-center">Toque no botão 'viva-voz' abaixo para ouvir a Aline.</p>
+                <p className="text-[12px] text-[#FFCC00] font-bold text-center">Toque no botão 'viva-voz' abaixo para liberar o áudio.</p>
               </div>
             )}
           </div>
@@ -200,7 +208,7 @@ const CallMission: React.FC = () => {
                   disabled={item.disabled}
                   className={`flex flex-col items-center gap-2 transition-all ${item.disabled ? 'opacity-20' : 'active:scale-90'}`}
                 >
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white ${item.active ? 'bg-white text-black animate-bounce' : 'bg-white/10'}`}>
+                  <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white ${item.active ? 'bg-white text-black viva-voz-alert' : 'bg-white/10'}`}>
                     {item.icon}
                   </div>
                   <span className="text-[10px] font-bold text-white/60 uppercase tracking-tighter">{item.label}</span>
@@ -217,7 +225,6 @@ const CallMission: React.FC = () => {
         </div>
       )}
       
-      {/* Home Indicator */}
       <div className="flex justify-center pb-4 pt-2">
         <div className="w-32 h-1.5 bg-white/20 rounded-full" />
       </div>
