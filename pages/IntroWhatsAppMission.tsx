@@ -62,7 +62,6 @@ const IntroWhatsAppMission: React.FC = () => {
   };
 
   const unlockAudio = () => {
-    // Tática iOS: tocar som curto e silencioso no primeiro toque para liberar o hardware
     const silent = new Audio(SINGLE_KEY_SOUND_URL);
     silent.volume = 0.01;
     silent.play().catch(() => {});
@@ -116,11 +115,14 @@ const IntroWhatsAppMission: React.FC = () => {
   };
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, isTyping]);
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#F2F2F7] overflow-hidden max-w-[480px] mx-auto relative">
+    <div className="flex flex-col h-[100dvh] bg-[#F2F2F7] overflow-hidden max-w-[480px] mx-auto relative shadow-2xl">
+      {/* iOS Notificação Banner */}
       {!hasStarted && (
         <div className="absolute inset-0 z-[100] bg-black/20 backdrop-blur-[2px] flex flex-col items-center pt-14 px-4">
           <div 
@@ -147,18 +149,19 @@ const IntroWhatsAppMission: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-[#F6F6F6] z-20">
+      {/* Header Fixo */}
+      <div className="bg-[#F6F6F6] z-20 flex-none border-b border-gray-200">
         <IOSStatusBar dark />
-        <header className="px-4 py-2.5 flex items-center justify-between">
+        <header className="px-4 py-2 flex items-center justify-between h-[60px]">
           <div className="flex items-center gap-2">
             <ChevronLeft className="text-[#007AFF]" size={30} />
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border border-gray-200 shadow-sm">
                 <img src={profileImg} alt="Aline" className="w-full h-full object-cover" />
               </div>
-              <div className="flex flex-col -gap-1">
-                <h2 className="text-[17px] font-bold text-black leading-tight">Aline Neves</h2>
-                <p className="text-[12px] text-gray-500 font-medium">
+              <div className="flex flex-col">
+                <h2 className="text-[17px] font-bold text-black leading-none">Aline Neves</h2>
+                <p className="text-[12px] text-gray-500 font-medium mt-1">
                   {isTyping ? <span className="text-[#007AFF] animate-typing">digitando...</span> : 'online'}
                 </p>
               </div>
@@ -171,7 +174,8 @@ const IntroWhatsAppMission: React.FC = () => {
         </header>
       </div>
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#E5DDD5] relative" 
+      {/* Mensagens Roláveis */}
+      <main className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#E5DDD5] relative scroll-smooth hide-scrollbar" 
             style={{ 
               backgroundImage: "url('https://w0.peakpx.com/wallpaper/580/624/HD-wallpaper-whatsapp-background-dark-pattern-whatsapp-doodle-doodle-art.jpg')", 
               backgroundSize: '400px', 
@@ -196,10 +200,11 @@ const IntroWhatsAppMission: React.FC = () => {
             </div>
           </div>
         )}
-        <div ref={chatEndRef} className="h-10" />
+        <div ref={chatEndRef} className="h-4" />
       </main>
 
-      <footer className="bg-[#F6F6F6] border-t border-gray-200 p-2 pb-8 flex items-center gap-3 z-20">
+      {/* Footer Fixo */}
+      <footer className="bg-[#F6F6F6] border-t border-gray-200 p-2 pb-8 flex items-center gap-3 z-20 flex-none">
         <Plus className="text-[#007AFF]" size={28} />
         <div className="flex-1 bg-white border border-gray-300 rounded-full px-4 py-1.5 text-gray-300 text-[16px]">Mensagem</div>
         <div className="w-10 h-10 bg-[#007AFF] rounded-full flex items-center justify-center text-white">
