@@ -56,12 +56,27 @@ const SalesPage: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const trackInitiateCheckout = () => {
+    const fbq = (window as any).fbq;
+    if (typeof fbq === 'function') {
+      fbq('track', 'InitiateCheckout', {
+        content_name: 'Botão Página de Vendas - Filhos com Rotina',
+        value: 19.90,
+        currency: 'BRL'
+      });
+    }
+  };
+
+  const handleOpenForm = () => {
+    trackInitiateCheckout();
+    setShowLeadForm(true);
+  };
+
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid || isSubmitting) return;
     setIsSubmitting(true);
 
-    // Fix: Access fbq via any cast to avoid TypeScript error on window object
     const fbq = (window as any).fbq;
 
     // Dispara evento de Lead para o Facebook
@@ -72,9 +87,10 @@ const SalesPage: React.FC = () => {
       });
     }
 
-    // Dispara InitiateCheckout antes de ir para o checkout
+    // Dispara novamente InitiateCheckout na conversão final do lead antes do redirect
     if (typeof fbq === 'function') {
       fbq('track', 'InitiateCheckout', {
+        content_name: 'Redirect Checkout - Filhos com Rotina',
         value: 19.90,
         currency: 'BRL'
       });
@@ -86,7 +102,12 @@ const SalesPage: React.FC = () => {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...formData, origem: 'funnel_maternidade_d4k', data_cadastro: new Date().toLocaleString('pt-BR'), etapa: 'checkout_click' })
+          body: JSON.stringify({ 
+            ...formData, 
+            origem: 'funnel_maternidade_d4k', 
+            data_cadastro: new Date().toLocaleString('pt-BR'), 
+            etapa: 'checkout_click' 
+          })
         });
       }
       window.location.href = CHECKOUT_URL;
@@ -124,7 +145,7 @@ const SalesPage: React.FC = () => {
           O <strong>Filhos com Rotina</strong> é a ferramenta visual que transforma o caos diário em momentos de cooperação e paz na sua casa.
         </p>
         <div className="flex flex-col items-center gap-4 mb-16">
-          <button onClick={() => setShowLeadForm(true)} className="w-full max-w-[500px] bg-[#FE2C55] text-white font-black py-6 rounded-[2.5rem] text-xl shadow-[0_25px_60px_rgba(254,44,85,0.4)] active:scale-95 transition-all flex items-center justify-center gap-3 group">
+          <button onClick={handleOpenForm} className="w-full max-w-[500px] bg-[#FE2C55] text-white font-black py-6 rounded-[2.5rem] text-xl shadow-[0_25px_60px_rgba(254,44,85,0.4)] active:scale-95 transition-all flex items-center justify-center gap-3 group">
             QUERO A PAZ DE VOLTA <ArrowRight className="group-hover:translate-x-1 transition-transform" />
           </button>
           <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold uppercase tracking-widest"><Lock size={12} /> Pagamento Único • R$ 19,90</div>
@@ -228,7 +249,7 @@ const SalesPage: React.FC = () => {
               ))}
             </div>
             <div className="mb-12"><span className="text-gray-300 line-through text-lg font-bold">R$ 97,00</span><div className="text-7xl font-black text-[#0F172A] mt-2">R$ 19,90</div><p className="text-[#FE2C55] font-black text-[10px] uppercase tracking-[0.4em] mt-6">Pagamento Único</p></div>
-            <button onClick={() => setShowLeadForm(true)} className="w-full bg-[#FE2C55] text-white font-black py-7 rounded-3xl text-xl shadow-[0_20px_50px_rgba(254,44,85,0.4)] active:scale-95 transition-all mb-8 flex items-center justify-center gap-3">QUERO MEU ACESSO AGORA</button>
+            <button onClick={handleOpenForm} className="w-full bg-[#FE2C55] text-white font-black py-7 rounded-3xl text-xl shadow-[0_20px_50px_rgba(254,44,85,0.4)] active:scale-95 transition-all mb-8 flex items-center justify-center gap-3">QUERO MEU ACESSO AGORA</button>
             <div className="mt-12 p-8 bg-white rounded-[2.5rem] border-2 border-[#FE2C55]/10 flex flex-col items-center text-center shadow-lg animate-fade-in"><div className="bg-[#FE2C55] text-white p-3 rounded-full mb-4 shadow-lg"><ShieldCheck size={32} /></div><h4 className="font-black text-xl mb-2 text-gray-900">Garantia Incondicional de 7 dias</h4><p className="text-gray-600 text-sm leading-relaxed max-w-[400px]">Se o <strong>Filhos com Rotina</strong> não devolver a paz para sua casa, devolvemos 100% do seu dinheiro. Sem perguntas. Você não corre risco nenhum.</p></div>
           </div>
         </div>
@@ -243,7 +264,7 @@ const SalesPage: React.FC = () => {
       </footer>
 
       {/* Botão Flutuante de Compra */}
-      <div className={`fixed bottom-0 left-0 right-0 p-4 z-[200] transition-all duration-700 transform ${scrolled ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}><div className="max-w-[480px] mx-auto"><button onClick={() => setShowLeadForm(true)} className="w-full bg-[#FE2C55] text-white font-black py-5 rounded-[2rem] shadow-[0_15px_45px_rgba(254,44,85,0.6)] flex items-center justify-center gap-3 active:scale-95 border-2 border-white/20"><span className="text-base uppercase tracking-tight">Garantir Promoção • R$ 19,90</span><ArrowRight size={20} /></button></div></div>
+      <div className={`fixed bottom-0 left-0 right-0 p-4 z-[200] transition-all duration-700 transform ${scrolled ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}><div className="max-w-[480px] mx-auto"><button onClick={handleOpenForm} className="w-full bg-[#FE2C55] text-white font-black py-5 rounded-[2rem] shadow-[0_15px_45px_rgba(254,44,85,0.6)] flex items-center justify-center gap-3 active:scale-95 border-2 border-white/20"><span className="text-base uppercase tracking-tight">Garantir Promoção • R$ 19,90</span><ArrowRight size={20} /></button></div></div>
 
       {/* Modal de Lead */}
       {showLeadForm && (
@@ -251,7 +272,7 @@ const SalesPage: React.FC = () => {
           <div className="bg-white w-full max-w-md rounded-[3rem] shadow-2xl relative overflow-hidden animate-fade-in">
             <button onClick={() => setShowLeadForm(false)} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-400 hover:text-gray-900 transition-colors"><X size={20} /></button>
             <div className="p-8 sm:p-10">
-              <div className="text-center mb-8"><div className="inline-flex p-3 bg-[#FE2C55]/10 rounded-2xl text-[#FE2C55] mb-4"><Sparkles size={24} /></div><h3 className="text-2xl font-black tracking-tight text-[#0F172A] mb-2">Quase lá!</h3><p className="text-gray-500 text-sm">Preencha seus dados para receber o acesso exclusivo e prosseguir with sua compra.</p></div>
+              <div className="text-center mb-8"><div className="inline-flex p-3 bg-[#FE2C55]/10 rounded-2xl text-[#FE2C55] mb-4"><Sparkles size={24} /></div><h3 className="text-2xl font-black tracking-tight text-[#0F172A] mb-2">Quase lá!</h3><p className="text-gray-500 text-sm">Preencha seus dados para receber o acesso exclusivo e prosseguir com sua compra.</p></div>
               <form onSubmit={handleLeadSubmit} className="space-y-5">
                 <div className="space-y-1.5"><label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Primeiro Nome</label><div className="relative"><User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={18} /><input type="text" required placeholder="Ex: Maria" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-3xl py-4 pl-12 pr-6 text-gray-900 focus:ring-2 focus:ring-[#FE2C55]/20 focus:border-[#FE2C55] outline-none transition-all font-bold" /></div></div>
                 <div className="space-y-1.5"><label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">WhatsApp</label><div className="relative"><MessageCircle className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={18} /><input type="tel" required placeholder="(00) 00000-0000" value={formData.whatsapp} onChange={(e) => setFormData({...formData, whatsapp: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-3xl py-4 pl-12 pr-6 text-gray-900 focus:ring-2 focus:ring-[#FE2C55]/20 focus:border-[#FE2C55] outline-none transition-all font-bold" /></div></div>
