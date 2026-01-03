@@ -98,6 +98,12 @@ const IntroWhatsAppMission: React.FC = () => {
     if (hasStarted || !isMounted.current) return;
     unlockAudio();
     setHasStarted(true);
+
+    // Track Funnel Start
+    const fbq = (window as any).fbq;
+    if (typeof fbq === 'function') {
+      fbq('trackCustom', 'FunnelStart');
+    }
     
     await new Promise(res => setTimeout(res, 800));
 
@@ -108,6 +114,11 @@ const IntroWhatsAppMission: React.FC = () => {
     }
 
     if (isMounted.current) {
+      // Track Intro Completion
+      if (typeof fbq === 'function') {
+        fbq('trackCustom', 'IntroCompleted');
+      }
+
       navTimeoutRef.current = setTimeout(() => {
         if (isMounted.current) navigate('/missao-1-ligacao');
       }, 1800);

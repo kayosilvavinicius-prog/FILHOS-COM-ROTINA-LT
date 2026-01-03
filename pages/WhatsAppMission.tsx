@@ -105,6 +105,15 @@ const WhatsAppMission: React.FC = () => {
     if (isMounted.current) setShowCTA(true);
   };
 
+  const handleNextMission = () => {
+    // Facebook Tracking - Completed Mission 2
+    const fbq = (window as any).fbq;
+    if (typeof fbq === 'function') {
+      fbq('trackCustom', 'Mission2_Completed');
+    }
+    navigate('/missao-3-video');
+  };
+
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -166,7 +175,7 @@ const WhatsAppMission: React.FC = () => {
 
       {showCTA && (
         <div className="absolute bottom-[110px] left-0 right-0 px-6 flex justify-center z-30 animate-fade-in">
-          <button onClick={() => navigate('/missao-3-video')} className="w-full bg-[#25D366] text-white font-black py-4.5 rounded-2xl shadow-[0_15px_40px_rgba(37,211,102,0.4)] flex items-center justify-center gap-3 active:scale-95 transition-all animate-pulse border-2 border-white/20">
+          <button onClick={handleNextMission} className="w-full bg-[#25D366] text-white font-black py-4.5 rounded-2xl shadow-[0_15px_40px_rgba(37,211,102,0.4)] flex items-center justify-center gap-3 active:scale-95 transition-all animate-pulse border-2 border-white/20">
             <span className="text-[15px]">VER COMO ISSO MUDA TUDO ▶️</span>
           </button>
         </div>

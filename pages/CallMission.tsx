@@ -80,6 +80,12 @@ const CallMission: React.FC = () => {
     if (vibrationAudioRef.current) vibrationAudioRef.current.pause();
     setStatus('active');
     
+    // Facebook Tracking - Answered Call
+    const fbq = (window as any).fbq;
+    if (typeof fbq === 'function') {
+      fbq('trackCustom', 'Mission1_Answered');
+    }
+
     const alineAudio = initAlineAudio();
     alineAudio.play()
       .then(() => setAudioError(false))
@@ -90,7 +96,6 @@ const CallMission: React.FC = () => {
   };
 
   const tryForcePlay = () => {
-    // Se deu erro, matamos o objeto anterior e criamos um novo para garantir que o Safari aceite o novo evento de clique
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = "";
@@ -109,6 +114,12 @@ const CallMission: React.FC = () => {
     const endAudio = new Audio(END_CALL_SOUND_URL);
     endAudio.play().catch(() => {});
     
+    // Facebook Tracking - Completed Mission 1
+    const fbq = (window as any).fbq;
+    if (typeof fbq === 'function') {
+      fbq('trackCustom', 'Mission1_Completed');
+    }
+
     setStatus('ended');
     setIsExiting(true);
     setTimeout(() => { 

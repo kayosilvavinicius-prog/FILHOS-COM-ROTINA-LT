@@ -58,6 +58,21 @@ const VideoMission: React.FC = () => {
   const handlePlaying = () => {
     setIsLoading(false);
     setIsPlaying(true);
+    
+    // Facebook Tracking - Started VSL
+    const fbq = (window as any).fbq;
+    if (typeof fbq === 'function') {
+      fbq('trackCustom', 'Mission3_Started');
+    }
+  };
+
+  const handleCTAClick = () => {
+    // Facebook Tracking - Completed Mission 3 / Advanced to Sales
+    const fbq = (window as any).fbq;
+    if (typeof fbq === 'function') {
+      fbq('trackCustom', 'Mission3_Completed');
+    }
+    navigate('/sales');
   };
 
   useEffect(() => {
@@ -130,7 +145,7 @@ const VideoMission: React.FC = () => {
         <div className="mb-32 pl-2"><h3 className="text-white font-bold text-[18px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">@alineneves_oficial</h3><p className="text-white/95 text-[15px] leading-tight mt-1.5 line-clamp-1 italic drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Transformando a rotina da sua casa.</p></div>
         <div className="w-full h-[3px] bg-white/10 rounded-full mb-8 relative overflow-hidden"><div className="absolute h-full bg-[#FE2C55] transition-all duration-100 ease-linear shadow-[0_0_8px_rgba(254,44,85,0.8)]" style={{ width: `${progress}%` }} /></div>
         {showCTA && (
-          <button onClick={() => navigate('/sales')} className="w-full bg-[#FE2C55] text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-[0_10px_40px_rgba(254,44,85,0.5)] animate-fade-in">
+          <button onClick={handleCTAClick} className="w-full bg-[#FE2C55] text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-[0_10px_40px_rgba(254,44,85,0.5)] animate-fade-in">
             <span className="tracking-tight uppercase text-[16px]">Quero meu filho com rotina</span>
             <ArrowRight size={24} />
           </button>

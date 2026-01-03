@@ -40,6 +40,19 @@ const SalesPage: React.FC = () => {
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 400);
     window.addEventListener('scroll', handleScroll);
+    
+    // Fix: Access fbq via any cast to avoid TypeScript error on window object
+    const fbq = (window as any).fbq;
+    // Dispara ViewContent ao entrar na página de vendas
+    if (typeof fbq === 'function') {
+      fbq('track', 'ViewContent', {
+        content_name: 'Página de Vendas - Filhos com Rotina',
+        content_category: 'Maternidade',
+        value: 19.90,
+        currency: 'BRL'
+      });
+    }
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -47,6 +60,26 @@ const SalesPage: React.FC = () => {
     e.preventDefault();
     if (!isFormValid || isSubmitting) return;
     setIsSubmitting(true);
+
+    // Fix: Access fbq via any cast to avoid TypeScript error on window object
+    const fbq = (window as any).fbq;
+
+    // Dispara evento de Lead para o Facebook
+    if (typeof fbq === 'function') {
+      fbq('track', 'Lead', {
+        content_name: 'Lead Checkout - Filhos com Rotina',
+        status: 'Formulário Preenchido'
+      });
+    }
+
+    // Dispara InitiateCheckout antes de ir para o checkout
+    if (typeof fbq === 'function') {
+      fbq('track', 'InitiateCheckout', {
+        value: 19.90,
+        currency: 'BRL'
+      });
+    }
+
     try {
       if (WEBHOOK_URL && WEBHOOK_URL !== "SUA_URL_DO_WEBHOOK_AQUI") {
         await fetch(WEBHOOK_URL, {
@@ -218,7 +251,7 @@ const SalesPage: React.FC = () => {
           <div className="bg-white w-full max-w-md rounded-[3rem] shadow-2xl relative overflow-hidden animate-fade-in">
             <button onClick={() => setShowLeadForm(false)} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-400 hover:text-gray-900 transition-colors"><X size={20} /></button>
             <div className="p-8 sm:p-10">
-              <div className="text-center mb-8"><div className="inline-flex p-3 bg-[#FE2C55]/10 rounded-2xl text-[#FE2C55] mb-4"><Sparkles size={24} /></div><h3 className="text-2xl font-black tracking-tight text-[#0F172A] mb-2">Quase lá!</h3><p className="text-gray-500 text-sm">Preencha seus dados para receber o acesso exclusivo e prosseguir com sua compra.</p></div>
+              <div className="text-center mb-8"><div className="inline-flex p-3 bg-[#FE2C55]/10 rounded-2xl text-[#FE2C55] mb-4"><Sparkles size={24} /></div><h3 className="text-2xl font-black tracking-tight text-[#0F172A] mb-2">Quase lá!</h3><p className="text-gray-500 text-sm">Preencha seus dados para receber o acesso exclusivo e prosseguir with sua compra.</p></div>
               <form onSubmit={handleLeadSubmit} className="space-y-5">
                 <div className="space-y-1.5"><label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Primeiro Nome</label><div className="relative"><User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={18} /><input type="text" required placeholder="Ex: Maria" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-3xl py-4 pl-12 pr-6 text-gray-900 focus:ring-2 focus:ring-[#FE2C55]/20 focus:border-[#FE2C55] outline-none transition-all font-bold" /></div></div>
                 <div className="space-y-1.5"><label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">WhatsApp</label><div className="relative"><MessageCircle className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={18} /><input type="tel" required placeholder="(00) 00000-0000" value={formData.whatsapp} onChange={(e) => setFormData({...formData, whatsapp: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-3xl py-4 pl-12 pr-6 text-gray-900 focus:ring-2 focus:ring-[#FE2C55]/20 focus:border-[#FE2C55] outline-none transition-all font-bold" /></div></div>
