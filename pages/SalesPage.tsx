@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   CheckCircle2, 
   ShieldCheck, 
@@ -18,7 +18,8 @@ import {
   CalendarCheck,
   Tv,
   EyeOff,
-  Brain
+  Brain,
+  ChevronDown
 } from 'lucide-react';
 
 const ASSETS = {
@@ -33,6 +34,7 @@ const SalesPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', whatsapp: '' });
+  const finalCtaRef = useRef<HTMLDivElement>(null);
 
   const isFormValid = formData.name.trim().length >= 2 && 
                       formData.email.includes('@') && 
@@ -44,11 +46,15 @@ const SalesPage: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const trackCheckoutAttempt = (location: string) => {
+  const scrollToFinal = () => {
+    finalCtaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  const openCheckoutProcess = () => {
     const fbq = (window as any).fbq;
     if (typeof fbq === 'function') {
       fbq('track', 'InitiateCheckout', {
-        content_name: 'Filhos com Rotina - ' + location,
+        content_name: 'Filhos com Rotina - Final Click',
         value: 19.90,
         currency: 'BRL'
       });
@@ -66,7 +72,6 @@ const SalesPage: React.FC = () => {
       fbq('track', 'Lead', { content_category: 'Maternidade' });
     }
 
-    // Delay para garantir que o pixel dispare antes do redirect
     setTimeout(() => {
       window.location.href = CHECKOUT_URL;
     }, 400);
@@ -74,9 +79,40 @@ const SalesPage: React.FC = () => {
 
   return (
     <div className="bg-[#FAF9F6] text-[#0F172A] min-h-screen font-sans pb-32 overflow-x-hidden selection:bg-[#FE2C55]/20">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes shine {
+          0% { left: -100%; }
+          20% { left: 100%; }
+          100% { left: 100%; }
+        }
+        .animate-shine {
+          position: relative;
+          overflow: hidden;
+        }
+        .animate-shine::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -100%;
+          width: 50%;
+          height: 200%;
+          background: rgba(255, 255, 255, 0.4);
+          transform: rotate(30deg);
+          animation: shine 3s infinite;
+        }
+        .btn-pulse-heavy {
+          animation: pulseHeavy 2s infinite;
+        }
+        @keyframes pulseHeavy {
+          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(254, 44, 85, 0.7); }
+          70% { transform: scale(1.03); box-shadow: 0 0 0 20px rgba(254, 44, 85, 0); }
+          100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(254, 44, 85, 0); }
+        }
+      `}} />
+
       {/* Barra de Urgência */}
       <div className="bg-[#FE2C55] text-white text-[10px] sm:text-xs font-black py-2.5 text-center uppercase tracking-[0.2em] sticky top-0 z-[100] shadow-md px-4">
-        OFERTA EXCLUSIVA: ACESSO IMEDIATO POR APENAS R$ 19,90
+        OFERTA EXCLUSIVA: ACESSO IMEDIATO POR UM PREÇO ESPECIAL
       </div>
 
       {/* Hero Section */}
@@ -96,10 +132,10 @@ const SalesPage: React.FC = () => {
 
         <div className="flex flex-col items-center gap-4 mb-20">
           <button 
-            onClick={() => trackCheckoutAttempt('Hero')} 
+            onClick={scrollToFinal} 
             className="w-full max-w-[550px] bg-[#FE2C55] text-white font-black py-7 rounded-[2.5rem] text-xl shadow-[0_25px_60px_rgba(254,44,85,0.4)] active:scale-95 transition-all flex items-center justify-center gap-3 group border-b-4 border-red-700"
           >
-            QUERO A PAZ DE VOLTA NA MINHA CASA <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+            QUERO A PAZ DE VOLTA NA MINHA CASA <ChevronDown className="group-hover:translate-y-1 transition-transform" />
           </button>
           <div className="flex items-center gap-4 text-gray-400 text-[11px] font-bold uppercase tracking-widest">
             <span className="flex items-center gap-1.5"><Lock size={14} /> Compra Segura</span>
@@ -114,7 +150,7 @@ const SalesPage: React.FC = () => {
         </div>
       </section>
 
-      {/* NOVO: Seção de Telas vs Rotina Visual */}
+      {/* Seção de Telas vs Rotina Visual */}
       <section className="py-24 px-6 bg-red-50/50">
         <div className="max-w-[1000px] mx-auto">
           <div className="bg-white p-10 sm:p-16 rounded-[4rem] shadow-[0_30px_70px_rgba(254,44,85,0.08)] border border-red-100">
@@ -263,8 +299,8 @@ const SalesPage: React.FC = () => {
         </div>
       </section>
 
-      {/* CTA Final */}
-      <section className="py-32 px-6 text-center">
+      {/* CTA Final - ONDE A ANCORAGEM ACONTECE */}
+      <section ref={finalCtaRef} className="py-32 px-6 text-center">
         <div className="max-w-[700px] mx-auto">
           <h2 className="text-4xl sm:text-6xl font-black text-[#0F172A] mb-8 leading-tight tracking-tight">O próximo passo para uma casa em paz.</h2>
           <div className="bg-white rounded-[3.5rem] p-10 sm:p-14 shadow-2xl text-left border border-gray-100 relative">
@@ -278,15 +314,17 @@ const SalesPage: React.FC = () => {
 
             <div className="text-center mb-10">
               <div className="text-gray-400 line-through text-lg font-bold">R$ 97,00</div>
-              <div className="text-7xl font-black text-[#FE2C55] tracking-tighter">R$ 19,90</div>
-              <p className="text-xs font-bold text-gray-400 mt-2 uppercase tracking-widest">Pagamento único • Sem mensalidades</p>
+              <div className="text-4xl sm:text-5xl font-black text-[#FE2C55] tracking-tight mt-2">
+                Por uma <span className="italic underline">fração</span> deste valor
+              </div>
+              <p className="text-xs font-bold text-gray-400 mt-4 uppercase tracking-widest">Descubra o desconto na próxima página</p>
             </div>
 
             <button 
-              onClick={() => trackCheckoutAttempt('Footer')} 
-              className="w-full bg-[#FE2C55] text-white font-black py-7 rounded-[2rem] text-xl shadow-[0_20px_50px_rgba(254,44,85,0.4)] active:scale-95 transition-all flex items-center justify-center gap-3 uppercase border-b-4 border-red-700"
+              onClick={openCheckoutProcess} 
+              className="w-full bg-[#FE2C55] text-white font-black py-7 rounded-[2rem] text-xl shadow-[0_20px_50px_rgba(254,44,85,0.4)] active:scale-95 transition-all flex items-center justify-center gap-3 uppercase border-b-4 border-red-700 animate-shine btn-pulse-heavy"
             >
-              SIM! QUERO TRANSFORMAR MINHA ROTINA
+              Quero Aproveitar o Preço especial <ArrowRight size={24} />
             </button>
           </div>
         </div>
@@ -296,10 +334,10 @@ const SalesPage: React.FC = () => {
       <div className={`fixed bottom-0 left-0 right-0 p-4 z-[200] transition-all duration-700 transform ${scrolled ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
         <div className="max-w-[500px] mx-auto">
           <button 
-            onClick={() => trackCheckoutAttempt('Floating')} 
-            className="w-full bg-[#FE2C55] text-white font-black py-5 rounded-[2rem] shadow-[0_15px_45px_rgba(254,44,85,0.6)] flex items-center justify-center gap-3 active:scale-95 border-2 border-white/20 uppercase tracking-tight text-sm"
+            onClick={scrollToFinal} 
+            className="w-full bg-[#FE2C55] text-white font-black py-5 rounded-[2rem] shadow-[0_15px_45px_rgba(254,44,85,0.6)] flex items-center justify-center gap-3 active:scale-95 border-2 border-white/20 uppercase tracking-tight text-sm animate-shine"
           >
-            Aproveitar Promoção • R$ 19,90
+            Aproveitar Preço Especial • AGORA
           </button>
         </div>
       </div>
@@ -333,9 +371,9 @@ const SalesPage: React.FC = () => {
                 <button 
                   type="submit" 
                   disabled={!isFormValid || isSubmitting} 
-                  className="w-full py-6 rounded-[1.5rem] font-black text-white bg-[#FE2C55] shadow-[0_15px_35px_rgba(254,44,85,0.4)] flex items-center justify-center gap-3 mt-6 hover:bg-red-600 transition-colors border-b-4 border-red-700 disabled:opacity-50"
+                  className="w-full py-6 rounded-[1.5rem] font-black text-white bg-[#FE2C55] shadow-[0_15px_35px_rgba(254,44,85,0.4)] flex items-center justify-center gap-3 mt-6 hover:bg-red-600 transition-colors border-b-4 border-red-700 disabled:opacity-50 animate-shine"
                 >
-                  {isSubmitting ? <Loader2 className="animate-spin" size={24} /> : 'IR PARA O PAGAMENTO SEGURO'}
+                  {isSubmitting ? <Loader2 className="animate-spin" size={24} /> : 'LIBERAR MEU DESCONTO AGORA'}
                 </button>
               </form>
             </div>
