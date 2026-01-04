@@ -40,17 +40,6 @@ const SalesPage: React.FC = () => {
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 400);
     window.addEventListener('scroll', handleScroll);
-    
-    // Dispara ViewContent ao carregar a página
-    const fbq = (window as any).fbq;
-    if (typeof fbq === 'function') {
-      fbq('track', 'ViewContent', {
-        content_name: 'Guia Filhos com Rotina',
-        value: 19.90,
-        currency: 'BRL'
-      });
-    }
-
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -77,8 +66,8 @@ const SalesPage: React.FC = () => {
     // Dispara Lead e reforça o InitiateCheckout antes de sair da página
     if (typeof fbq === 'function') {
       fbq('track', 'Lead', { content_category: 'Maternidade' });
-      fbq('track', 'InitiateCheckout', {
-        content_name: 'Lead Convertido - Redirecionando',
+      fbq('track', 'Purchase', {
+        content_name: 'Tentativa de Compra - Checkout',
         value: 19.90,
         currency: 'BRL'
       });
@@ -97,7 +86,6 @@ const SalesPage: React.FC = () => {
           })
         });
       }
-      // Pequeno delay para garantir que o Pixel disparou antes do redirecionamento
       setTimeout(() => {
         window.location.href = CHECKOUT_URL;
       }, 100);
