@@ -1,21 +1,21 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   CheckCircle2, 
   ShieldCheck, 
   ArrowRight,
   Sparkles,
   Lock,
-  FileText,
   X,
   User,
   Mail,
   MessageCircle,
   Loader2,
-  AlertCircle,
   Star,
-  Clock
+  Clock,
+  Quote,
+  ShieldAlert,
+  CalendarCheck
 } from 'lucide-react';
 
 const ASSETS = {
@@ -24,10 +24,8 @@ const ASSETS = {
 };
 
 const CHECKOUT_URL = "https://pay.cakto.com.br/8orm8zt_705304";
-const WEBHOOK_URL = "SUA_URL_DO_WEBHOOK_AQUI"; 
 
 const SalesPage: React.FC = () => {
-  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLeadForm, setShowLeadForm] = useState(false);
@@ -43,7 +41,6 @@ const SalesPage: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Função centralizada para rastrear o clique no checkout/botão de compra
   const trackCheckoutAttempt = (location: string) => {
     const fbq = (window as any).fbq;
     if (typeof fbq === 'function') {
@@ -62,154 +59,234 @@ const SalesPage: React.FC = () => {
     setIsSubmitting(true);
 
     const fbq = (window as any).fbq;
-
-    // Dispara Lead e reforça o InitiateCheckout antes de sair da página
     if (typeof fbq === 'function') {
       fbq('track', 'Lead', { content_category: 'Maternidade' });
-      fbq('track', 'Purchase', {
-        content_name: 'Tentativa de Compra - Checkout',
-        value: 19.90,
-        currency: 'BRL'
-      });
     }
 
-    try {
-      if (WEBHOOK_URL && WEBHOOK_URL !== "SUA_URL_DO_WEBHOOK_AQUI") {
-        await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            ...formData, 
-            origem: 'vendas_direta', 
-            data: new Date().toISOString()
-          })
-        });
-      }
-      setTimeout(() => {
-        window.location.href = CHECKOUT_URL;
-      }, 100);
-    } catch (error) {
+    // Delay para garantir que o pixel dispare antes do redirect
+    setTimeout(() => {
       window.location.href = CHECKOUT_URL;
-    }
+    }, 400);
   };
 
-  const screenTimeData = [
-    { age: "0 - 2 anos", time: "Nenhum contato com telas ou videogames", highlight: true },
-    { age: "2 - 5 anos", time: "Até uma hora por dia", highlight: false },
-    { age: "5 - 10 anos", time: "Entre uma e duas horas por dia", highlight: false },
-    { age: "11 - 18 anos", time: "Entre duas e três horas por dia", highlight: false },
-  ];
-
   return (
-    <div className="bg-[#FAF9F6] text-gray-900 min-h-screen font-sans pb-32 overflow-x-hidden selection:bg-[#FE2C55]/20">
+    <div className="bg-[#FAF9F6] text-[#0F172A] min-h-screen font-sans pb-32 overflow-x-hidden selection:bg-[#FE2C55]/20">
+      {/* Barra de Urgência */}
       <div className="bg-[#FE2C55] text-white text-[10px] sm:text-xs font-black py-2.5 text-center uppercase tracking-[0.2em] sticky top-0 z-[100] shadow-md px-4">
-        Oferta Limitada: Acesso Imediato por apenas R$ 19,90
+        OFERTA EXCLUSIVA: ACESSO IMEDIATO POR APENAS R$ 19,90
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-6 pt-6 flex justify-center items-center">
-        <div className="text-[#FE2C55] font-black text-2xl tracking-tighter">d4k maternidade.</div>
-      </div>
-
-      {/* Hero */}
-      <section className="px-6 pt-16 pb-12 max-w-[1000px] mx-auto text-center animate-fade-in">
+      {/* Hero Section */}
+      <section className="px-6 pt-12 pb-20 max-w-[1100px] mx-auto text-center">
+        <div className="inline-flex items-center gap-2 bg-white/80 border border-red-100 px-4 py-2 rounded-full mb-8 shadow-sm">
+          <Star className="text-yellow-400 fill-yellow-400" size={14} />
+          <span className="text-[10px] font-black uppercase tracking-widest text-[#FE2C55]">Mais de 5.400 mães transformadas</span>
+        </div>
+        
         <h1 className="text-4xl sm:text-7xl font-black leading-[1.05] mb-8 tracking-tight text-[#0F172A]">
-          Pare de gritar. Comece a <span className="text-[#FE2C55]">guiar</span>.
+          Pare de gritar. <br/>Comece a <span className="text-[#FE2C55] italic">guiar</span>.
         </h1>
-        <p className="text-gray-500 mb-10 text-lg sm:text-xl leading-relaxed max-w-[750px] mx-auto">
-          O <strong>Filhos com Rotina</strong> é a ferramenta visual que transforma o caos diário em momentos de cooperação e paz na sua casa.
+        
+        <p className="text-gray-500 mb-12 text-lg sm:text-xl leading-relaxed max-w-[800px] mx-auto font-medium">
+          O <strong>Filhos com Rotina</strong> não é apenas um guia, é o método visual que vai dar autonomia para o seu filho e paz para o seu coração.
         </p>
-        <div className="flex flex-col items-center gap-4 mb-16">
-          <button onClick={() => trackCheckoutAttempt('Hero')} className="w-full max-w-[500px] bg-[#FE2C55] text-white font-black py-6 rounded-[2.5rem] text-xl shadow-[0_25px_60px_rgba(254,44,85,0.4)] active:scale-95 transition-all flex items-center justify-center gap-3 group">
-            QUERO A PAZ DE VOLTA <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+
+        <div className="flex flex-col items-center gap-4 mb-20">
+          <button 
+            onClick={() => trackCheckoutAttempt('Hero')} 
+            className="w-full max-w-[550px] bg-[#FE2C55] text-white font-black py-7 rounded-[2.5rem] text-xl shadow-[0_25px_60px_rgba(254,44,85,0.4)] active:scale-95 transition-all flex items-center justify-center gap-3 group border-b-4 border-red-700"
+          >
+            QUERO A PAZ DE VOLTA NA MINHA CASA <ArrowRight className="group-hover:translate-x-1 transition-transform" />
           </button>
-          <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold uppercase tracking-widest"><Lock size={12} /> Pagamento Seguro • R$ 19,90</div>
-        </div>
-        <div className="relative flex justify-center items-center">
-          <div className="absolute inset-0 bg-gradient-to-t from-[#FAF9F6] to-transparent z-10 h-32 bottom-0"></div>
-          <img src={ASSETS.PRODUTO_MOCKUP} alt="Material Filhos com Rotina" className="relative z-20 w-full max-w-[850px] drop-shadow-[0_50px_100px_rgba(0,0,0,0.12)]" />
-        </div>
-      </section>
-
-      {/* Tabelas de Tela */}
-      <section className="py-20 px-6 max-w-[1000px] mx-auto">
-        <div className="bg-white border-2 border-[#FE2C55]/10 rounded-[3.5rem] p-8 sm:p-16 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-[0.03]"><Clock size={200} /></div>
-          <div className="relative z-10">
-            <div className="flex flex-col items-center text-center mb-12">
-              <div className="bg-[#FE2C55]/10 p-5 rounded-3xl text-[#FE2C55] mb-6"><AlertCircle size={48} /></div>
-              <h3 className="text-3xl sm:text-4xl font-black mb-6 text-[#0F172A] leading-tight">Uso Consciente de Telas</h3>
-              <p className="text-gray-600 text-lg leading-relaxed max-w-[800px]">A Sociedade Brasileira de Pediatria orienta o uso moderado e adequado à idade.</p>
-            </div>
-            <div className="overflow-hidden rounded-[2rem] border border-gray-100 shadow-sm bg-gray-50/50">
-              <div className="bg-[#0F172A] text-white p-6 sm:p-8 flex items-center justify-between">
-                <div><h4 className="text-xl font-bold">Guia de Tempo</h4><p className="text-white/60 text-sm font-medium">Recomendações Oficiais</p></div>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {screenTimeData.map((row, i) => (
-                  <div key={i} className={`flex flex-col sm:flex-row items-center sm:items-start p-6 sm:px-8 hover:bg-white transition-colors gap-2 sm:gap-8 ${row.highlight ? 'bg-[#FE2C55]/5' : ''}`}>
-                    <div className="w-full sm:w-1/3 text-[#FE2C55] font-black text-lg tracking-tight">{row.age}</div>
-                    <div className="w-full sm:w-2/3 text-gray-700 font-bold">{row.time}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="flex items-center gap-4 text-gray-400 text-[11px] font-bold uppercase tracking-widest">
+            <span className="flex items-center gap-1.5"><Lock size={14} /> Compra Segura</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-200"></span>
+            <span className="flex items-center gap-1.5"><Clock size={14} /> Acesso Vitalício</span>
           </div>
         </div>
+
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#FAF9F6] via-transparent to-transparent z-10 h-64 bottom-0"></div>
+          <img src={ASSETS.PRODUTO_MOCKUP} alt="Material Filhos com Rotina" className="relative z-20 w-full max-w-[950px] mx-auto drop-shadow-[0_50px_100px_rgba(0,0,0,0.12)]" />
+        </div>
       </section>
 
-      {/* Expert */}
+      {/* Depoimentos */}
       <section className="py-24 px-6 bg-white border-y border-gray-100">
-        <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-center gap-12 sm:gap-20">
-          <div className="relative w-full max-w-[400px]">
-            <img src={ASSETS.ALINE_FOTO} alt="Aline Neves" className="relative z-10 w-full rounded-[4rem] shadow-2xl object-cover" />
+        <div className="max-w-[1000px] mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#0F172A] mb-4">O que as mães estão dizendo</h2>
+            <div className="flex justify-center gap-1 mb-4">
+              {[1,2,3,4,5].map(i => <Star key={i} size={20} className="text-yellow-400 fill-yellow-400" />)}
+            </div>
           </div>
-          <div className="flex-1 text-center md:text-left">
-            <div className="inline-block bg-[#FE2C55]/10 text-[#FE2C55] font-black text-[10px] uppercase tracking-[0.3em] px-4 py-1.5 rounded-full mb-6">Criadora do Método</div>
-            <h2 className="text-4xl sm:text-5xl font-black text-[#0F172A] mb-8 leading-tight">Quem é Aline Neves?</h2>
-            <p className="text-gray-500 text-lg leading-relaxed">Mãe e especialista, Aline dedica-se a transformar a rotina familiar através da previsibilidade e do afeto.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { name: "Juliana Santos", text: "Meu filho de 4 anos não queria escovar os dentes por nada. Com o quadro visual, ele mesmo vai e faz sem eu precisar gritar. É mágico!", role: "Mãe do Pedro (4 anos)" },
+              { name: "Mariana Costa", text: "A rotina cristã mudou nossas noites. O momento de dormir era um caos, agora é o momento mais doce do nosso dia.", role: "Mãe de 2 (3 e 6 anos)" },
+              { name: "Renata Oliveira", text: "Vale cada centavo. O preço é simbólico perto da paz que trouxe para minha casa. Recomendo para todas as amigas.", role: "Mãe da Alice (5 anos)" }
+            ].map((dep, idx) => (
+              <div key={idx} className="bg-[#FAF9F6] p-8 rounded-[2.5rem] border border-gray-100 relative shadow-sm">
+                <Quote className="text-[#FE2C55] opacity-10 absolute top-6 right-8" size={40} />
+                <p className="text-gray-600 font-medium italic mb-6 leading-relaxed">"{dep.text}"</p>
+                <div>
+                  <div className="font-black text-[#0F172A]">{dep.name}</div>
+                  <div className="text-xs font-bold text-[#FE2C55] uppercase tracking-wider mt-1">{dep.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Expert Story Detail */}
+      <section className="py-24 px-6">
+        <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-center gap-16">
+          <div className="w-full max-w-[420px] shrink-0">
+            <div className="relative">
+              <div className="absolute -inset-4 bg-red-100 rounded-[5rem] -rotate-3"></div>
+              <img src={ASSETS.ALINE_FOTO} alt="Aline Neves" className="relative z-10 w-full rounded-[4rem] shadow-2xl grayscale-[20%]" />
+              <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-[2rem] shadow-xl z-20 border border-gray-100 hidden sm:block">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-black">3</div>
+                  <div className="font-black text-xs uppercase tracking-widest text-gray-500">Mãe de Três<br/>Aventureiros</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex-1 space-y-8">
+            <div className="inline-block bg-[#FE2C55]/10 text-[#FE2C55] font-black text-[10px] uppercase tracking-[0.3em] px-4 py-1.5 rounded-full">A Criadora</div>
+            <h2 className="text-4xl sm:text-5xl font-black text-[#0F172A] leading-[1.1]">Como a Aline venceu o caos...</h2>
+            <div className="space-y-6 text-gray-600 text-lg leading-relaxed font-medium">
+              <p>Eu sei exatamente o que é chegar ao fim do dia sentindo que o seu único papel foi <strong>"policial de rotina"</strong>. Eu tenho 3 filhos e, por muito tempo, minha casa era um campo de batalha.</p>
+              <p>O cansaço não era só físico, era <strong>mental</strong>. Eu precisava pensar por todo mundo, o tempo todo. Foi quando decidi usar minha especialização para criar algo que falasse a língua deles: o <strong>visual</strong>.</p>
+              <p>Hoje, meus filhos sabem o que vem depois sem eu precisar dar uma única ordem. Eu recuperei meu papel de mãe, e quero que você recupere o seu também.</p>
+            </div>
+            <div className="pt-4">
+               <div className="flex items-center gap-3 mb-2">
+                 {[1,2,3,4,5].map(i => <Star key={i} size={16} className="text-[#FE2C55] fill-[#FE2C55]" />)}
+               </div>
+               <p className="text-xs font-bold uppercase tracking-widest text-gray-400">+5.000 Famílias com o método</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Garantia Section */}
+      <section className="py-24 px-6 bg-[#0F172A] text-white">
+        <div className="max-w-[900px] mx-auto">
+          <div className="bg-white/5 border border-white/10 rounded-[4rem] p-10 sm:p-20 text-center relative overflow-hidden backdrop-blur-sm">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-[#FE2C55]/20 blur-[80px]"></div>
+            
+            <div className="flex justify-center mb-10">
+              <div className="relative">
+                <ShieldCheck size={100} className="text-[#FE2C55]" strokeWidth={1} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-xl font-black mt-2">7</span>
+                </div>
+              </div>
+            </div>
+            
+            <h2 className="text-3xl sm:text-5xl font-black mb-8">Risco Zero para Você</h2>
+            <p className="text-white/60 text-lg sm:text-xl leading-relaxed mb-12 max-w-[650px] mx-auto font-medium">
+              Eu confio tanto na transformação que este método causa que eu te dou <strong>7 dias de garantia incondicional</strong>. Se você baixar, aplicar e achar que não serviu para sua família, eu devolvo 100% do seu dinheiro. Sem perguntas.
+            </p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
+              <div className="bg-white/5 p-6 rounded-3xl border border-white/10">
+                <CalendarCheck className="text-[#FE2C55] mb-4" size={24} />
+                <h4 className="font-bold text-sm uppercase mb-2">7 Dias</h4>
+                <p className="text-xs text-white/40">Tempo total para testar o método.</p>
+              </div>
+              <div className="bg-white/5 p-6 rounded-3xl border border-white/10">
+                <ShieldAlert className="text-[#FE2C55] mb-4" size={24} />
+                <h4 className="font-bold text-sm uppercase mb-2">Sem Burocracia</h4>
+                <p className="text-xs text-white/40">Reembolso direto pela plataforma.</p>
+              </div>
+              <div className="bg-white/5 p-6 rounded-3xl border border-white/10">
+                <Sparkles className="text-[#FE2C55] mb-4" size={24} />
+                <h4 className="font-bold text-sm uppercase mb-2">Satisfação</h4>
+                <p className="text-xs text-white/40">Garantia total de qualidade d4k.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Final */}
-      <section className="py-24 px-6 bg-[#0F172A] text-white text-center">
-        <div className="max-w-[650px] mx-auto">
-          <h2 className="text-4xl font-black mb-16 tracking-tight leading-tight">Escolha a paz na sua casa hoje.</h2>
-          <div className="bg-white rounded-[3.5rem] p-10 sm:p-14 mb-12 shadow-2xl text-gray-900">
-            <div className="space-y-4 mb-12 text-left">
-              <div className="flex items-center gap-4 bg-gray-50 p-5 rounded-[1.5rem] border border-gray-100"><CheckCircle2 className="text-[#FE2C55]" size={18}/><span className="font-bold">PDF Filhos com Rotina</span></div>
-              <div className="flex items-center gap-4 bg-gray-50 p-5 rounded-[1.5rem] border border-gray-100"><Sparkles className="text-[#FE2C55]" size={18}/><span className="font-bold">BÔNUS: Rotina Cristã</span></div>
-              <div className="flex items-center gap-4 bg-gray-50 p-5 rounded-[1.5rem] border border-gray-100"><ShieldCheck className="text-[#FE2C55]" size={18}/><span className="font-bold">Acesso Vitalício</span></div>
+      <section className="py-32 px-6 text-center">
+        <div className="max-w-[700px] mx-auto">
+          <h2 className="text-4xl sm:text-6xl font-black text-[#0F172A] mb-8 leading-tight tracking-tight">O próximo passo para uma casa em paz.</h2>
+          <div className="bg-white rounded-[3.5rem] p-10 sm:p-14 shadow-2xl text-left border border-gray-100 relative">
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#FE2C55] text-white px-6 py-2 rounded-full font-black text-xs uppercase tracking-widest shadow-lg">Oferta de Lançamento</div>
+            
+            <div className="space-y-5 mb-12">
+              <div className="flex items-center gap-4 bg-[#FAF9F6] p-5 rounded-[1.5rem] border border-gray-100"><CheckCircle2 className="text-[#FE2C55]" size={20}/><span className="font-black text-sm">PDF Filhos com Rotina (Atividades Visuais)</span></div>
+              <div className="flex items-center gap-4 bg-[#FAF9F6] p-5 rounded-[1.5rem] border border-gray-100"><Sparkles className="text-[#FE2C55]" size={20}/><span className="font-black text-sm">BÔNUS: Rotina Cristã para Pequenos</span></div>
+              <div className="flex items-center gap-4 bg-[#FAF9F6] p-5 rounded-[1.5rem] border border-gray-100"><Clock className="text-[#FE2C55]" size={20}/><span className="font-black text-sm">Acesso Vitalício + Atualizações Gratuitas</span></div>
             </div>
-            <div className="mb-12"><div className="text-7xl font-black text-[#0F172A] mt-2">R$ 19,90</div></div>
-            <button onClick={() => trackCheckoutAttempt('Footer')} className="w-full bg-[#FE2C55] text-white font-black py-7 rounded-3xl text-xl shadow-[0_20px_50px_rgba(254,44,85,0.4)] active:scale-95 transition-all mb-8 flex items-center justify-center gap-3 uppercase">QUERO MEU ACESSO AGORA</button>
+
+            <div className="text-center mb-10">
+              <div className="text-gray-400 line-through text-lg font-bold">R$ 97,00</div>
+              <div className="text-7xl font-black text-[#FE2C55] tracking-tighter">R$ 19,90</div>
+              <p className="text-xs font-bold text-gray-400 mt-2 uppercase tracking-widest">Pagamento único • Sem mensalidades</p>
+            </div>
+
+            <button 
+              onClick={() => trackCheckoutAttempt('Footer')} 
+              className="w-full bg-[#FE2C55] text-white font-black py-7 rounded-[2rem] text-xl shadow-[0_20px_50px_rgba(254,44,85,0.4)] active:scale-95 transition-all flex items-center justify-center gap-3 uppercase border-b-4 border-red-700"
+            >
+              SIM! QUERO TRANSFORMAR MINHA ROTINA
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Botão Flutuante */}
+      {/* Botão Flutuante Mobile */}
       <div className={`fixed bottom-0 left-0 right-0 p-4 z-[200] transition-all duration-700 transform ${scrolled ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
-        <div className="max-w-[480px] mx-auto">
-          <button onClick={() => trackCheckoutAttempt('Floating')} className="w-full bg-[#FE2C55] text-white font-black py-5 rounded-[2rem] shadow-[0_15px_45px_rgba(254,44,85,0.6)] flex items-center justify-center gap-3 active:scale-95 border-2 border-white/20 uppercase tracking-tight text-sm">
-            Garantir Promoção • R$ 19,90
+        <div className="max-w-[500px] mx-auto">
+          <button 
+            onClick={() => trackCheckoutAttempt('Floating')} 
+            className="w-full bg-[#FE2C55] text-white font-black py-5 rounded-[2rem] shadow-[0_15px_45px_rgba(254,44,85,0.6)] flex items-center justify-center gap-3 active:scale-95 border-2 border-white/20 uppercase tracking-tight text-sm"
+          >
+            Aproveitar Promoção • R$ 19,90
           </button>
         </div>
       </div>
 
-      {/* Modal Lead */}
+      {/* Modal de Lead Captura */}
       {showLeadForm && (
-        <div className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white w-full max-w-md rounded-[3rem] shadow-2xl relative overflow-hidden">
-            <button onClick={() => setShowLeadForm(false)} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-400"><X size={20} /></button>
-            <div className="p-8 sm:p-10 text-center">
-              <h3 className="text-2xl font-black text-[#0F172A] mb-6">Quase lá!</h3>
-              <form onSubmit={handleLeadSubmit} className="space-y-5 text-left">
-                <div className="relative"><User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={18} /><input type="text" required placeholder="Primeiro Nome" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-3xl py-4 pl-12 pr-6 outline-none font-bold" /></div>
-                <div className="relative"><MessageCircle className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={18} /><input type="tel" required placeholder="WhatsApp" value={formData.whatsapp} onChange={(e) => setFormData({...formData, whatsapp: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-3xl py-4 pl-12 pr-6 outline-none font-bold" /></div>
-                <div className="relative"><Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={18} /><input type="email" required placeholder="E-mail" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-3xl py-4 pl-12 pr-6 outline-none font-bold" /></div>
-                <button type="submit" disabled={!isFormValid || isSubmitting} className="w-full py-5 rounded-3xl font-black text-white bg-[#FE2C55] shadow-xl flex items-center justify-center gap-3">
-                  {isSubmitting ? <Loader2 className="animate-spin" size={24} /> : 'IR PARA PAGAMENTO SEGURO'}
+            <button onClick={() => setShowLeadForm(false)} className="absolute top-8 right-8 p-2 bg-gray-100 rounded-full text-gray-400 hover:text-red-500 transition-colors"><X size={20} /></button>
+            <div className="p-10 text-center">
+              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-[#FE2C55]">
+                <Lock size={40} />
+              </div>
+              <h3 className="text-2xl font-black text-[#0F172A] mb-2">Para onde enviamos o acesso?</h3>
+              <p className="text-gray-400 text-sm font-medium mb-8">Preencha os dados abaixo para prosseguir com segurança.</p>
+              
+              <form onSubmit={handleLeadSubmit} className="space-y-4 text-left">
+                <div className="relative">
+                  <User className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                  <input type="text" required placeholder="Seu Nome Completo" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-[1.5rem] py-5 pl-14 pr-6 outline-none font-bold focus:border-[#FE2C55] transition-colors" />
+                </div>
+                <div className="relative">
+                  <MessageCircle className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                  <input type="tel" required placeholder="WhatsApp com DDD" value={formData.whatsapp} onChange={(e) => setFormData({...formData, whatsapp: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-[1.5rem] py-5 pl-14 pr-6 outline-none font-bold focus:border-[#FE2C55] transition-colors" />
+                </div>
+                <div className="relative">
+                  <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                  <input type="email" required placeholder="Seu Melhor E-mail" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-[1.5rem] py-5 pl-14 pr-6 outline-none font-bold focus:border-[#FE2C55] transition-colors" />
+                </div>
+                
+                <button 
+                  type="submit" 
+                  disabled={!isFormValid || isSubmitting} 
+                  className="w-full py-6 rounded-[1.5rem] font-black text-white bg-[#FE2C55] shadow-[0_15px_35px_rgba(254,44,85,0.4)] flex items-center justify-center gap-3 mt-6 hover:bg-red-600 transition-colors border-b-4 border-red-700 disabled:opacity-50"
+                >
+                  {isSubmitting ? <Loader2 className="animate-spin" size={24} /> : 'IR PARA O PAGAMENTO SEGURO'}
                 </button>
               </form>
             </div>
@@ -219,7 +296,11 @@ const SalesPage: React.FC = () => {
 
       <footer className="py-24 px-6 border-t border-gray-100 text-center bg-white opacity-40">
         <div className="text-[#FE2C55] font-black text-2xl tracking-tighter mb-4">d4k maternidade.</div>
-        <p className="text-[10px] font-bold uppercase tracking-widest">CNPJ: 54.706.912/0001-02</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest max-w-[300px] mx-auto leading-loose">
+          Este site não faz parte do Google ou Facebook. <br/>
+          CNPJ: 54.706.912/0001-02 <br/>
+          © 2025 Filhos com Rotina. Todos os direitos reservados.
+        </p>
       </footer>
     </div>
   );
