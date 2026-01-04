@@ -112,7 +112,7 @@ const SalesPage: React.FC = () => {
 
       {/* Barra de Urgência */}
       <div className="bg-[#FE2C55] text-white text-[10px] sm:text-xs font-black py-2.5 text-center uppercase tracking-[0.2em] sticky top-0 z-[100] shadow-md px-4">
-        OFERTA EXCLUSIVA: ACESSO IMEDIATO POR UM PREÇO ESPECIAL
+        ACESSO IMEDIATO
       </div>
 
       {/* Hero Section */}
@@ -165,14 +165,22 @@ const SalesPage: React.FC = () => {
                 <p className="text-gray-600 text-lg leading-relaxed font-medium">
                   A <strong>Sociedade Brasileira de Pediatria (SBP)</strong> é clara: o uso precoce e excessivo de telas prejudica o sono, a linguagem e o controle emocional das crianças. 
                 </p>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
+                <div className="space-y-4 grid grid-cols-1 gap-4">
+                  <div className="flex items-start gap-4 p-3 bg-red-50/30 rounded-2xl border border-red-100/50">
                     <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-1"><X size={14} className="text-red-600" /></div>
-                    <p className="text-sm text-gray-500"><strong>0 a 2 anos:</strong> Exposição zero, nem mesmo passivamente.</p>
+                    <p className="text-sm text-gray-600"><strong>Menores de 2 anos:</strong> Exposição zero, nem mesmo passivamente.</p>
                   </div>
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-4 p-3 bg-red-50/30 rounded-2xl border border-red-100/50">
                     <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-1"><X size={14} className="text-red-600" /></div>
-                    <p className="text-sm text-gray-500"><strong>2 a 5 anos:</strong> Máximo de 1 hora por dia, sempre com supervisão.</p>
+                    <p className="text-sm text-gray-600"><strong>2 a 5 anos:</strong> Máximo de 1 hora/dia, sempre com supervisão.</p>
+                  </div>
+                  <div className="flex items-start gap-4 p-3 bg-red-50/30 rounded-2xl border border-red-100/50">
+                    <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-1"><X size={14} className="text-red-600" /></div>
+                    <p className="text-sm text-gray-600"><strong>6 a 10 anos:</strong> Limite de 1 a 2 horas/dia, sob vigilância total.</p>
+                  </div>
+                  <div className="flex items-start gap-4 p-3 bg-red-50/30 rounded-2xl border border-red-100/50">
+                    <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-1"><X size={14} className="text-red-600" /></div>
+                    <p className="text-sm text-gray-600"><strong>11 a 18 anos:</strong> Máximo de 2 a 3 horas/dia. Proibido durante a noite.</p>
                   </div>
                 </div>
               </div>
