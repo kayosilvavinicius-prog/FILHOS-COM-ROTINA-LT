@@ -19,7 +19,9 @@ import {
   Tv,
   EyeOff,
   Brain,
-  ChevronDown
+  ChevronDown,
+  Info,
+  Lightbulb
 } from 'lucide-react';
 
 const ASSETS = {
@@ -155,20 +157,20 @@ const SalesPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Seção de Telas vs Rotina Visual */}
+      {/* Seção de Telas vs Rotina Visual (Copy Contraintuitiva) */}
       <section className="py-24 px-6 bg-red-50/50">
         <div className="max-w-[1000px] mx-auto">
           <div className="bg-white p-10 sm:p-16 rounded-[4rem] shadow-[0_30px_70px_rgba(254,44,85,0.08)] border border-red-100">
             <div className="flex flex-col md:flex-row gap-12 items-center">
               <div className="flex-1 space-y-6">
-                <div className="inline-flex items-center gap-2 bg-[#FE2C55]/10 text-[#FE2C55] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
-                   <ShieldAlert size={14} /> Alerta das Autoridades
+                <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
+                   <Lightbulb size={14} /> Você sabia disso?
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-black text-[#0F172A] leading-tight">
-                  O uso de telas não é "ajuda", é um <span className="text-[#FE2C55]">bloqueio</span>.
+                  A Sociedade Brasileira de Pediatria <span className="text-blue-600 underline">não proíbe</span> o uso de telas.
                 </h2>
                 <p className="text-gray-600 text-lg leading-relaxed font-medium">
-                  A <strong>Sociedade Brasileira de Pediatria (SBP)</strong> é clara: o uso precoce e excessivo de telas prejudica o sono, a linguagem e o controle emocional das crianças. 
+                  Isso mesmo. O segredo não está na proibição total, mas no <strong>equilíbrio e no limite adequado</strong> de exposição para cada fase do desenvolvimento.
                 </p>
                 <div className="space-y-4 grid grid-cols-1 gap-4">
                   <div className="flex items-start gap-4 p-3 bg-red-50/30 rounded-2xl border border-red-100/50">
@@ -192,16 +194,16 @@ const SalesPage: React.FC = () => {
               
               <div className="flex-1 bg-[#FAF9F6] p-8 rounded-[3rem] border border-gray-100">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-[#FE2C55] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-200">
+                  <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
                     <Brain size={24} />
                   </div>
-                  <h4 className="font-black text-lg text-[#0F172A]">A Solução Visual</h4>
+                  <h4 className="font-black text-lg text-[#0F172A]">O Problema Real</h4>
                 </div>
                 <p className="text-gray-500 text-sm leading-relaxed mb-6">
-                  As crianças "travam" quando não sabem o que vem depois. Elas buscam nas telas o estímulo que falta na rotina. 
+                  Seu filho não briga pela tela porque é "viciado", ele briga porque <strong>não consegue enxergar o que vem depois</strong> daquele prazer imediato.
                 </p>
                 <p className="text-[#0F172A] font-bold text-sm leading-relaxed">
-                  Ao usar uma <span className="text-[#FE2C55]">Rotina Visual concreta</span>, você substitui a dopamina barata do celular pela satisfação real de completar uma tarefa. Elas se sentem seguras, engajadas e, finalmente, <strong>livres da dependência digital.</strong>
+                  O <strong>Filhos com Rotina</strong> ensina a criança a ter o "GPS Visual" do dia. Quando ela sabe exatamente a hora de brincar, comer e sim, o momento da tela, a ansiedade acaba e a cooperação começa.
                 </p>
               </div>
             </div>
