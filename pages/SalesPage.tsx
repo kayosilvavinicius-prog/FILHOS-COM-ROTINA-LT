@@ -140,7 +140,7 @@ const SalesPage: React.FC = () => {
           <div className="flex items-center gap-4 text-gray-400 text-[11px] font-bold uppercase tracking-widest">
             <span className="flex items-center gap-1.5"><Lock size={14} /> Compra Segura</span>
             <span className="w-1.5 h-1.5 rounded-full bg-gray-200"></span>
-            <span className="flex items-center gap-1.5"><Clock size={14} /> Acesso Vitalício</span>
+            <span className="flex items-center gap-1.5"><Clock size={14} /> Acesso de 12 meses</span>
           </div>
         </div>
 
@@ -316,8 +316,8 @@ const SalesPage: React.FC = () => {
             
             <div className="space-y-5 mb-12">
               <div className="flex items-center gap-4 bg-[#FAF9F6] p-5 rounded-[1.5rem] border border-gray-100"><CheckCircle2 className="text-[#FE2C55]" size={20}/><span className="font-black text-sm">PDF Filhos com Rotina (Atividades Visuais)</span></div>
-              <div className="flex items-center gap-4 bg-[#FAF9F6] p-5 rounded-[1.5rem] border border-gray-100"><Sparkles className="text-[#FE2C55]" size={20}/><span className="font-black text-sm">BÔNUS: Rotina Cristã para Pequenos</span></div>
-              <div className="flex items-center gap-4 bg-[#FAF9F6] p-5 rounded-[1.5rem] border border-gray-100"><Clock className="text-[#FE2C55]" size={20}/><span className="font-black text-sm">Acesso Vitalício + Atualizações Gratuitas</span></div>
+              <div className="flex items-center gap-4 bg-[#FAF9F6] p-5 rounded-[1.5rem] border border-gray-100"><Sparkles className="text-[#FE2C55]" size={20}/><span className="font-black text-sm">BÔNUS: Tarefas Semanais</span></div>
+              <div className="flex items-center gap-4 bg-[#FAF9F6] p-5 rounded-[1.5rem] border border-gray-100"><Clock className="text-[#FE2C55]" size={20}/><span className="font-black text-sm">Acesso de 12 meses + Atualizações Gratuitas</span></div>
             </div>
 
             <div className="text-center mb-10">
@@ -342,7 +342,7 @@ const SalesPage: React.FC = () => {
       <div className={`fixed bottom-0 left-0 right-0 p-4 z-[200] transition-all duration-700 transform ${scrolled ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
         <div className="max-w-[500px] mx-auto">
           <button 
-            onClick={scrollToFinal} 
+            onClick={openCheckoutProcess} 
             className="w-full bg-[#FE2C55] text-white font-black py-5 rounded-[2rem] shadow-[0_15px_45px_rgba(254,44,85,0.6)] flex items-center justify-center gap-3 active:scale-95 border-2 border-white/20 uppercase tracking-tight text-sm animate-shine"
           >
             Aproveitar Preço Especial • AGORA
