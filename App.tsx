@@ -7,6 +7,36 @@ import WhatsAppMission from './pages/WhatsAppMission';
 import VideoMission from './pages/VideoMission';
 import SalesPage from './pages/SalesPage';
 
+const CRITICAL_ASSETS = [
+  "https://raw.githubusercontent.com/kayosilvavinicius-prog/FILHOS-COM-ROTINA/fe3f6ea59b951352e43388c8da1f56115e911980/WhatsApp%20Ptt%202025-12-30%20at%2009.57.36.ogg",
+  "https://raw.githubusercontent.com/kayosilvavinicius-prog/FILHOS-COM-ROTINA/2e88443c33f9150b3ac0649a37043d6ff25a5844/filhos%20com%20rotina%20material.png",
+  "https://raw.githubusercontent.com/kayosilvavinicius-prog/FILHOS-COM-ROTINA/33b5814f67fd820ca815cac9094f790e29102d28/ALINE%20WHATSAPP.jpg"
+];
+
+const AssetPreloader = () => {
+  useEffect(() => {
+    // Pré-carrega imagens e áudios críticos no início do funil
+    CRITICAL_ASSETS.forEach(url => {
+      if (url.endsWith('.png') || url.endsWith('.jpg')) {
+        const img = new Image();
+        img.src = url;
+      } else if (url.endsWith('.ogg') || url.endsWith('.mp3')) {
+        const audio = new Audio();
+        audio.preload = "auto";
+        audio.src = url;
+      }
+    });
+
+    // Prefetch do vídeo da VSL (estratégico)
+    const videoPrefetch = document.createElement('link');
+    videoPrefetch.rel = 'prefetch';
+    videoPrefetch.href = "https://res.cloudinary.com/dafhibb8s/video/upload/v1767185181/MINI_VSL_40MB_-_FILHOS_COM_ROTINA_jgqf44.mp4";
+    document.head.appendChild(videoPrefetch);
+  }, []);
+
+  return null;
+};
+
 const AnalyticsTracker = () => {
   const location = useLocation();
 
@@ -44,6 +74,7 @@ const AnalyticsTracker = () => {
 const App: React.FC = () => {
   return (
     <HashRouter>
+      <AssetPreloader />
       <AnalyticsTracker />
       <div className="min-h-screen bg-white text-gray-900 selection:bg-red-500/20">
         <Routes>

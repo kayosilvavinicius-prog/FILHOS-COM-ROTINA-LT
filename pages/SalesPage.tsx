@@ -146,7 +146,12 @@ const SalesPage: React.FC = () => {
 
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-t from-[#FAF9F6] via-transparent to-transparent z-10 h-64 bottom-0"></div>
-          <img src={ASSETS.PRODUTO_MOCKUP} alt="Material Filhos com Rotina" className="relative z-20 w-full max-w-[950px] mx-auto drop-shadow-[0_50px_100px_rgba(0,0,0,0.12)]" />
+          <img 
+            src={ASSETS.PRODUTO_MOCKUP} 
+            alt="Material Filhos com Rotina" 
+            decoding="async"
+            className="relative z-20 w-full max-w-[950px] mx-auto drop-shadow-[0_50px_100px_rgba(0,0,0,0.12)]" 
+          />
         </div>
       </section>
 
@@ -239,7 +244,13 @@ const SalesPage: React.FC = () => {
           <div className="w-full max-w-[420px] shrink-0">
             <div className="relative">
               <div className="absolute -inset-4 bg-red-100 rounded-[5rem] -rotate-3"></div>
-              <img src={ASSETS.ALINE_FOTO} alt="Aline Neves" className="relative z-10 w-full rounded-[4rem] shadow-2xl grayscale-[20%]" />
+              <img 
+                src={ASSETS.ALINE_FOTO} 
+                alt="Aline Neves" 
+                loading="lazy"
+                decoding="async"
+                className="relative z-10 w-full rounded-[4rem] shadow-2xl grayscale-[20%]" 
+              />
               <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-[2rem] shadow-xl z-20 border border-gray-100 hidden sm:block">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-black">3</div>
