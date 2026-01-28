@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Phone, MessageSquare, Play, ShoppingCart, Settings, Sparkles } from 'lucide-react';
+import { Phone, MessageSquare, Play, ShoppingCart, Settings, Sparkles, Home } from 'lucide-react';
 
 const TestHome: React.FC = () => {
   const navigate = useNavigate();
 
   const missions = [
     { 
-      path: '/missao-0-intro', 
+      path: '/', 
       name: 'Missão 0: WhatsApp Intro', 
       icon: <Sparkles className="text-yellow-400" />, 
       desc: 'Início do funil: Boas-vindas e aviso de chamada' 
@@ -41,7 +41,7 @@ const TestHome: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0F172A] p-6 flex flex-col items-center justify-center">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-8 animate-fade-in">
         <div className="text-center space-y-2">
           <div className="inline-flex p-3 bg-white/5 rounded-2xl border border-white/10 mb-2">
             <Settings className="text-white/40" size={32} />
@@ -68,7 +68,13 @@ const TestHome: React.FC = () => {
           ))}
         </div>
 
-        <div className="pt-8 text-center">
+        <div className="pt-8 text-center flex flex-col gap-4">
+          <button 
+            onClick={() => navigate('/')}
+            className="inline-flex items-center justify-center gap-2 text-white/30 hover:text-white/60 text-xs font-bold transition-colors"
+          >
+            <Home size={14} /> VOLTAR PARA O INÍCIO
+          </button>
           <p className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-black">
             D4K Experience Debugger
           </p>
