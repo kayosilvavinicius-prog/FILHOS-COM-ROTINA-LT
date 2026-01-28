@@ -342,9 +342,15 @@ const SalesPage: React.FC = () => {
         <div className="max-w-[700px] mx-auto">
           <h2 className="text-4xl sm:text-6xl font-black text-[#0F172A] mb-8 leading-tight tracking-tight">O próximo passo para uma casa em paz.</h2>
           <div className="bg-white rounded-[3.5rem] p-10 sm:p-14 shadow-2xl text-left border border-gray-100 relative">
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#FE2C55] text-white px-6 py-2 rounded-full font-black text-xs uppercase tracking-widest shadow-lg">CONDIÇÃO ESPECIAL • VOLTA ÀS AULAS</div>
             
-            <div className="space-y-4 mb-12">
+            {/* Selo de Oferta Otimizado para Mobile e Desktop */}
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#FE2C55] text-white px-8 py-3.5 rounded-[2rem] font-black text-[10px] sm:text-xs uppercase tracking-[0.15em] shadow-2xl w-[90%] sm:w-auto text-center flex flex-col sm:flex-row items-center justify-center leading-tight border-2 border-white/10 whitespace-normal sm:whitespace-nowrap gap-0.5 sm:gap-2">
+              <span>CONDIÇÃO ESPECIAL</span>
+              <span className="hidden sm:inline opacity-40">•</span>
+              <span>VOLTA ÀS AULAS</span>
+            </div>
+            
+            <div className="space-y-4 mb-12 mt-4 sm:mt-0">
               <div className="flex items-center gap-4 bg-[#FAF9F6] p-4 rounded-[1.5rem] border border-gray-100"><CheckCircle2 className="text-[#FE2C55]" size={18}/><span className="font-black text-[13px]">Aplicativo do Sistema Filhos com Rotina</span></div>
               <div className="flex items-center gap-4 bg-[#FAF9F6] p-4 rounded-[1.5rem] border border-gray-100"><Sparkles className="text-[#FE2C55]" size={18}/><span className="font-black text-[13px]">Rotinas prontas + criador de rotinas personalizadas</span></div>
               <div className="flex items-center gap-4 bg-[#FAF9F6] p-4 rounded-[1.5rem] border border-gray-100"><Star className="text-[#FE2C55]" size={18}/><span className="font-black text-[13px]">Sistema de pontos com recompensas reais</span></div>
