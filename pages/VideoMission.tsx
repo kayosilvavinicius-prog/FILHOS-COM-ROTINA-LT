@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, Volume2, VolumeX, ArrowRight, Play, Plus, AlertTriangle, Loader2 } from 'lucide-react';
+import { funnelTracker } from '../services/funnelTracker';
 
 const VSL_VIDEO_URL = "https://res.cloudinary.com/dafhibb8s/video/upload/v1767185181/MINI_VSL_40MB_-_FILHOS_COM_ROTINA_jgqf44.mp4";
 
@@ -22,8 +22,14 @@ const VideoMission: React.FC = () => {
       const currentTime = videoRef.current.currentTime;
       const duration = videoRef.current.duration;
       if (duration > 0) setProgress((currentTime / duration) * 100);
+      
       const shouldShow = (currentTime >= 30 && currentTime < 60) || (currentTime >= 120);
       if (shouldShow !== showCTA) setShowCTA(shouldShow);
+
+      // Rastrear conclusão se chegar perto do fim
+      if (duration > 0 && currentTime / duration > 0.95) {
+        funnelTracker.track("ETAPA_3_VSL_CONCLUIDA");
+      }
     }
   };
 
@@ -77,7 +83,7 @@ const VideoMission: React.FC = () => {
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.playbackRate = 1.0; // Velocidade normal 1.0x
+      videoRef.current.playbackRate = 1.0;
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {

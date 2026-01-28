@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import IntroWhatsAppMission from './pages/IntroWhatsAppMission';
@@ -8,6 +7,7 @@ import VideoMission from './pages/VideoMission';
 import SalesPage from './pages/SalesPage';
 import TestHome from './pages/TestHome';
 import { Settings } from 'lucide-react';
+import { funnelTracker, FunnelStep } from './services/funnelTracker';
 
 const CRITICAL_ASSETS = [
   "https://raw.githubusercontent.com/kayosilvavinicius-prog/FILHOS-COM-ROTINA/fe3f6ea59b951352e43388c8da1f56115e911980/WhatsApp%20Ptt%202025-12-30%20at%2009.57.36.ogg",
@@ -17,7 +17,6 @@ const CRITICAL_ASSETS = [
 
 const AssetPreloader = () => {
   useEffect(() => {
-    // Pré-carrega imagens e áudios críticos no início do funil
     CRITICAL_ASSETS.forEach(url => {
       if (url.endsWith('.png') || url.endsWith('.jpg')) {
         const img = new Image();
@@ -29,7 +28,6 @@ const AssetPreloader = () => {
       }
     });
 
-    // Prefetch do vídeo da VSL (estratégico)
     const videoPrefetch = document.createElement('link');
     videoPrefetch.rel = 'prefetch';
     videoPrefetch.href = "https://res.cloudinary.com/dafhibb8s/video/upload/v1767185181/MINI_VSL_40MB_-_FILHOS_COM_ROTINA_jgqf44.mp4";
@@ -44,28 +42,26 @@ const AnalyticsTracker = () => {
 
   useEffect(() => {
     try {
+      // 1. Facebook Pixel
       const fbq = (window as any).fbq;
       if (typeof fbq === 'function') {
-        const routeMap: Record<string, string> = {
-          '/': '0 - Intro WhatsApp',
-          '/missao-1-ligacao': '1 - Ligacao Recebida',
-          '/missao-2-whatsapp': '2 - Chat de Conscientizacao',
-          '/missao-3-video': '3 - Video VSL',
-          '/sales': '4 - Pagina de Vendas',
-          '/dev': 'Menu Dev'
-        };
-
-        const pageName = routeMap[location.pathname] || 'Outra Pagina';
         fbq('track', 'PageView');
-        
-        const isSalesPage = location.pathname === '/sales';
-        fbq('track', 'ViewContent', {
-          content_name: pageName,
-          content_category: 'Funil Filhos com Rotina',
-          value: isSalesPage ? 19.90 : 0,
-          currency: 'BRL'
-        });
       }
+
+      // 2. Google Sheets Tracker
+      const routeToStep: Record<string, FunnelStep> = {
+        '/': 'ETAPA_0_ENTROU_FUNIL',
+        '/missao-1-ligacao': 'ETAPA_2_LIGACAO', // Mapeamento conforme colunas do usuário
+        '/missao-2-whatsapp': 'ETAPA_1_WHATSAPP', 
+        '/missao-3-video': 'ETAPA_3_VSL_INICIADA',
+        '/sales': 'ETAPA_4_PAGINA_VENDAS'
+      };
+
+      const step = routeToStep[location.pathname];
+      if (step) {
+        funnelTracker.track(step);
+      }
+
     } catch (e) {
       console.warn("Analytics error:", e);
     }
@@ -77,10 +73,7 @@ const AnalyticsTracker = () => {
 const DevMenuTrigger = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Não mostra o botão se já estiver na página de dev
   if (location.pathname === '/dev') return null;
-
   return (
     <button 
       onClick={() => navigate('/dev')}
